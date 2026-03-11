@@ -208,6 +208,17 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
       }
 
+      .suggestion-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .suggestion-item:hover {
+        background: #f1f5ff;
+      }
+
       /* ✨ New row animation */
       @keyframes rowAdd {
         from {
@@ -261,7 +272,32 @@
       <video id="video" playsinline></video>
 
       <div class="inputs">
-        <input id="scanInput" type="text" placeholder="Scan or enter barcode" />
+        <div style="position: relative">
+          <input
+            id="scanInput"
+            type="text"
+            placeholder="Scan or enter barcode"
+            style="width: 100%"
+          />
+
+          <div
+            id="productSuggestions"
+            style="
+              position: absolute;
+              top: 100%;
+              left: 0;
+              right: 0;
+              background: white;
+              border: 1px solid #ccc;
+              border-top: none;
+              max-height: 200px;
+              overflow-y: auto;
+              z-index: 999;
+              display: none;
+            "
+          ></div>
+        </div>
+
         <input
           id="qtyInput"
           type="number"
@@ -338,6 +374,11 @@
       const qtyInput = document.getElementById("qtyInput");
       const tableBody = document.getElementById("tableBody");
       const uniqueCountDiv = document.getElementById("uniqueCount");
+
+      scanInput.addEventListener("input", (e) => {
+        searchProducts(e.target.value);
+      });
+
       let productMap = {}; // Fast SKU lookup
       let upcMap = {};
       let isLoading = false;
@@ -473,6 +514,53 @@
             row.style.display = "none";
           }
         });
+      }
+
+      function searchProducts(query) {
+        const box = document.getElementById("productSuggestions");
+
+        if (!query || query.length < 2) {
+          box.style.display = "none";
+          return;
+        }
+
+        query = query.toLowerCase();
+
+        let results = [];
+
+        Object.entries(productMap).forEach(([sku, product]) => {
+          const text = (product.description + " " + sku).toLowerCase();
+
+          if (text.includes(query)) {
+            results.push({ sku, description: product.description });
+          }
+        });
+
+        results = results.slice(0, 10); // limit results
+
+        if (results.length === 0) {
+          box.style.display = "none";
+          return;
+        }
+
+        box.innerHTML = "";
+
+        results.forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "suggestion-item";
+
+          div.innerHTML = `<b>${item.sku}</b><br>${item.description}`;
+
+          div.onclick = () => {
+            scanInput.value = item.sku;
+            box.style.display = "none";
+            qtyInput.focus();
+          };
+
+          box.appendChild(div);
+        });
+
+        box.style.display = "block";
       }
 
       function clearSearch() {
@@ -664,6 +752,12 @@
         if (e.key === "Enter") {
           e.preventDefault();
           qtyInput.focus();
+        }
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest("#scanInput")) {
+          document.getElementById("productSuggestions").style.display = "none";
         }
       });
 
