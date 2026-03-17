@@ -164,7 +164,7 @@
       .delete-btn {
         background: #e74c3c;
         color: #fff;
-        width: 34px;
+        width: 27px;
         height: 34px;
         border-radius: 4px;
         touch-action: manipulation;
@@ -193,6 +193,7 @@
         display: block;
         margin-top: 2px;
         text-align: center;
+        overflow-wrap: break-word;
       }
 
       .tooltip {
@@ -212,7 +213,7 @@
         padding: 10px;
         border-bottom: 1px solid #eee;
         cursor: pointer;
-        font-size: 14px;
+        font-size: 12px;
       }
 
       .suggestion-item:hover {
@@ -529,9 +530,19 @@
         let results = [];
 
         Object.entries(productMap).forEach(([sku, product]) => {
-          const text = (product.description + " " + sku).toLowerCase();
+          const text = (
+            product.description +
+            " " +
+            sku +
+            " " +
+            (product.vendorID || "") +
+            " " +
+            (product.upc || "")
+          ).toLowerCase();
 
-          if (text.includes(query)) {
+          const words = query.split(" ").filter((w) => w);
+          const isMatch = words.every((word) => text.includes(word));
+          if (isMatch) {
             results.push({ sku, description: product.description });
           }
         });
@@ -549,8 +560,11 @@
           const div = document.createElement("div");
           div.className = "suggestion-item";
 
-          div.innerHTML = `<b>${item.sku}</b><br>${item.description}`;
-
+          div.innerHTML = `
+  <b>${item.sku}</b><br>
+  ${item.description}<br>
+  <span style="color:#888; font-size:11px;">Vendor ID: ${productMap[item.sku].vendorID || "-"}</span>
+`;
           div.onclick = () => {
             scanInput.value = item.sku;
             box.style.display = "none";
@@ -599,6 +613,7 @@
               price,
               notes,
               vendorID,
+              upc,
             };
 
             if (upc) {
@@ -659,7 +674,7 @@
           tooltip.className = "tooltip";
 
           tooltip.innerHTML = `
-        <b>Price:</b> $${product.price || "-"}<br>
+        <b>Price:</b> $${product.price ? parseFloat(product.price).toFixed(2) : "-"}<br>
         <b>Vendor ID:</b> ${product.vendorID || "-"}<br>
         <b>Notes:</b> ${product.notes || "-"}
         `;
