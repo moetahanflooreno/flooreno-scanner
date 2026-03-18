@@ -220,6 +220,15 @@
         background: #f1f5ff;
       }
 
+      .missing-item {
+        background: #ffe5e5 !important;
+      }
+
+      .missing-text {
+        color: #e74c3c;
+        font-weight: bold;
+      }
+
       /* ✨ New row animation */
       @keyframes rowAdd {
         from {
@@ -309,8 +318,8 @@
         />
       </div>
 
-      <div id="uniqueCount" style="margin-bottom: 10px; font-weight: bold">
-        Unique SKUs: 0
+      <div id="counts" style="margin-bottom: 10px; font-weight: bold">
+        Unique SKUs: 0 | ❌ Not Found: 0
       </div>
 
       <div style="display: flex; gap: 6px; margin-bottom: 10px">
@@ -374,7 +383,7 @@
       const scanInput = document.getElementById("scanInput");
       const qtyInput = document.getElementById("qtyInput");
       const tableBody = document.getElementById("tableBody");
-      const uniqueCountDiv = document.getElementById("uniqueCount");
+      const countsDiv = document.getElementById("counts");
 
       scanInput.addEventListener("input", (e) => {
         searchProducts(e.target.value);
@@ -561,10 +570,10 @@
           div.className = "suggestion-item";
 
           div.innerHTML = `
-  <b>${item.sku}</b><br>
-  ${item.description}<br>
-  <span style="color:#888; font-size:11px;">Vendor ID: ${productMap[item.sku].vendorID || "-"}</span>
-`;
+          <b>${item.sku}</b><br>
+          ${item.description}<br>
+          <span style="color:#888; font-size:11px;">Vendor ID: ${productMap[item.sku].vendorID || "-"}</span>
+        `;
           div.onclick = () => {
             scanInput.value = item.sku;
             box.style.display = "none";
@@ -640,17 +649,17 @@
 
         const tr = document.createElement("tr");
         tr.classList.add("new-row");
-        const product = productMap[barcode] || {
-          description: "-",
-          price: "-",
-          notes: "-",
-        };
+        const product = productMap[barcode];
+        const isMissing = !product;
+
         tr.innerHTML = `
         <td class="col-num row-num"></td>
 
         <td>
         <span class="sku-id">${barcode}</span>
-        <span class="sku-desc">${product.description}</span>
+        <span class="sku-desc ${isMissing ? "missing-text" : ""}">
+          ${isMissing ? "⚠ NOT FOUND IN SYSTEM" : product.description}
+        </span>
         </td>
 
         <td class="col-qty">
@@ -663,6 +672,10 @@
 
         <td class="col-del"><button class="delete-btn">X</button></td>
         `;
+
+        if (isMissing) {
+          tr.classList.add("missing-item");
+        }
 
         const numCell = tr.querySelector(".row-num");
 
@@ -848,12 +861,33 @@
 
       /* Unique SKU count */
       function updateUniqueCount() {
-        const skus = new Set(
-          [...tableBody.children].map(
-            (r) => r.querySelector(".sku-id").innerText,
-          ),
-        );
-        uniqueCountDiv.innerText = `Unique SKUs: ${skus.size}`;
+        const rows = [...tableBody.children];
+
+        const skus = new Set();
+        let missingCount = 0;
+
+        rows.forEach((r) => {
+          const sku = r.querySelector(".sku-id").innerText;
+          skus.add(sku);
+
+          if (r.classList.contains("missing-item")) {
+            missingCount++;
+          }
+        });
+
+        countsDiv.innerHTML = `
+  <div style="display:flex; justify-content:space-between; align-items:center;padding-left: 10px; padding-right:10px;">
+    
+    <div>
+      Unique SKUs: ${skus.size}
+    </div>
+
+    <div style="color:${missingCount > 0 ? "#e74c3c" : "#333"};">
+      ❌ Not Found: ${missingCount}
+    </div>
+
+  </div>
+`;
       }
 
       function load() {
