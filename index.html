@@ -58,9 +58,13 @@
 
       .stop-btn {
         flex: 1;
-        background: #e74c3c;
+        background: #ccc; /* default grey */
         color: #fff;
         padding: 14px;
+      }
+
+      .stop-btn.active {
+        background: #e74c3c; /* red when active */
       }
 
       .export-btn,
@@ -229,6 +233,98 @@
         font-weight: bold;
       }
 
+      .clear-search-btn {
+        background: #ccc;
+        color: white;
+      }
+
+      .clear-search-btn.active {
+        background: #e74c3c;
+      }
+
+      /* 🧮 Floating button */
+      #calcBtn {
+        position: fixed;
+        bottom: 15px;
+        right: 15px;
+        left: auto;
+        padding: 5px;
+        /* width: 55px;
+        height: 55px; */
+        background: #1e1efd;
+        color: white;
+        font-size: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        z-index: 9999;
+      }
+
+      /* 🧮 Popup */
+      #calcBox {
+        position: fixed;
+        bottom: 80px;
+        right: 15px;
+        left: auto;
+        width: 260px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+        padding: 10px;
+        display: none;
+        z-index: 9999;
+      }
+
+      #calcHeader {
+        font-weight: bold;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+
+      #calcDisplay {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        margin-bottom: 6px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+      }
+
+      #calcResult {
+        font-size: 14px;
+        color: #333;
+        min-height: 20px;
+        text-align: right;
+      }
+      #calcKeys {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+      }
+
+      #calcKeys button {
+        padding: 14px;
+        font-size: 16px;
+        border-radius: 6px;
+        border: none;
+        background: #f1f1f1;
+        cursor: pointer;
+      }
+
+      #calcKeys button.op {
+        background: #dfe6ff;
+        font-weight: bold;
+      }
+
+      #calcKeys button.equal {
+        background: #1e1efd;
+        color: white;
+        font-weight: bold;
+      }
+
       /* ✨ New row animation */
       @keyframes rowAdd {
         from {
@@ -350,12 +446,8 @@
 
         <button
           onclick="clearSearch()"
-          style="
-            padding: 12px 16px;
-            background: #aaa;
-            color: white;
-            border-radius: 6px;
-          "
+          class="clear-search-btn"
+          style="padding: 12px 16px; border-radius: 6px"
         >
           Clear
         </button>
@@ -384,6 +476,17 @@
       const qtyInput = document.getElementById("qtyInput");
       const tableBody = document.getElementById("tableBody");
       const countsDiv = document.getElementById("counts");
+      const stopBtn = document.querySelector(".stop-btn");
+      const searchInput = document.getElementById("searchInput");
+      const clearSearchBtn = document.querySelector(".clear-search-btn");
+
+      searchInput.addEventListener("input", () => {
+        if (searchInput.value.trim()) {
+          clearSearchBtn.classList.add("active");
+        } else {
+          clearSearchBtn.classList.remove("active");
+        }
+      });
 
       scanInput.addEventListener("input", (e) => {
         searchProducts(e.target.value);
@@ -411,6 +514,83 @@
         "dup-color-4",
       ];
 
+      //calculator
+      document.addEventListener("DOMContentLoaded", () => {
+        const calcBtn = document.getElementById("calcBtn");
+        const calcBox = document.getElementById("calcBox");
+        const display = document.getElementById("calcDisplay");
+        const result = document.getElementById("calcResult");
+        const keys = document.querySelectorAll("#calcKeys button");
+
+        let calcOpen = false;
+
+        calcBtn.onclick = () => {
+          calcOpen = !calcOpen;
+          calcBox.style.display = calcOpen ? "block" : "none";
+        };
+
+        function calculate() {
+          try {
+            let exp = display.value;
+
+            // Handle iPhone-style %
+            exp = exp.replace(
+              /(\d+(\.\d+)?)([\+\-\*\/])(\d+(\.\d+)?)%/g,
+              (_, a, _a2, op, b) => {
+                a = parseFloat(a);
+                b = parseFloat(b);
+
+                if (op === "+" || op === "-") {
+                  return `${a}${op}${a * (b / 100)}`;
+                } else {
+                  // for * and / behave normally
+                  return `${a}${op}${b / 100}`;
+                }
+              },
+            );
+
+            // fallback: standalone %
+            exp = exp.replace(/(\d+(\.\d+)?)%/g, (_, n) => {
+              return parseFloat(n) / 100;
+            });
+
+            const res = Function(`"use strict"; return (${exp})`)();
+            result.innerText = "= " + res;
+            return res;
+          } catch {
+            result.innerText = "Invalid";
+            return null;
+          }
+        }
+
+        keys.forEach((btn) => {
+          btn.onclick = () => {
+            const val = btn.innerText;
+
+            if (val === "C") {
+              display.value = "";
+              result.innerText = "";
+              return;
+            }
+
+            if (val === "⌫") {
+              display.value = display.value.slice(0, -1);
+              calculate();
+              return;
+            }
+
+            if (val === "=") {
+              const res = calculate();
+              if (res !== null) display.value = res;
+              return;
+            }
+
+            display.value += val;
+            calculate();
+          };
+        });
+      });
+
       /* 🔊 Beep */
       function playBeep() {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -426,6 +606,7 @@
 
       /* 📷 Camera scan */
       function startCamera() {
+        stopBtn.classList.add("active");
         if (cameraRunning) return;
         cameraRunning = true;
         video.style.display = "block";
@@ -459,6 +640,7 @@
       }
 
       function stopCamera() {
+        stopBtn.classList.remove("active");
         if (codeReader) codeReader.reset();
         cameraRunning = false;
         video.style.display = "none";
@@ -587,13 +769,18 @@
       }
 
       function clearSearch() {
-        document.getElementById("searchInput").value = "";
+        const input = document.getElementById("searchInput");
+        const clearBtn = document.querySelector(".clear-search-btn");
+
+        input.value = "";
 
         const rows = tableBody.querySelectorAll("tr");
-
         rows.forEach((row) => {
           row.style.display = "";
         });
+
+        // ✅ force button back to grey
+        clearBtn.classList.remove("active");
       }
 
       async function loadProducts() {
@@ -876,17 +1063,20 @@
         });
 
         countsDiv.innerHTML = `
-  <div style="display:flex; justify-content:space-between; align-items:center;padding-left: 10px; padding-right:10px;">
-    
-    <div>
-      Unique SKUs: ${skus.size}
-    </div>
+<div style="display:flex; justify-content:space-between; align-items:center;padding-left:10px; padding-right:10px;">
 
-    <div style="color:${missingCount > 0 ? "#e74c3c" : "#333"};">
-      ❌ Not Found: ${missingCount}
-    </div>
-
+  <div>
+    Unique SKUs: ${skus.size}
   </div>
+
+  <div style="
+    color:${missingCount > 0 ? "#e74c3c" : "#999"};
+    font-weight:${missingCount > 0 ? "bold" : "normal"};
+  ">
+    ❌ Not Found: ${missingCount}
+  </div>
+
+</div>
 `;
       }
 
@@ -939,5 +1129,41 @@
         updateUniqueCount();
       });
     </script>
+
+    <!-- 🧮 Calculator Button -->
+    <div id="calcBtn">🧮</div>
+
+    <div id="calcBox">
+      <div id="calcHeader">Calculator</div>
+
+      <input id="calcDisplay" type="text" placeholder="0" readonly />
+      <div id="calcResult"></div>
+
+      <div id="calcKeys">
+        <button class="op">C</button>
+        <button class="op">⌫</button>
+        <button class="op">%</button>
+        <button class="op">/</button>
+
+        <button>7</button>
+        <button>8</button>
+        <button>9</button>
+        <button class="op">*</button>
+
+        <button>4</button>
+        <button>5</button>
+        <button>6</button>
+        <button class="op">-</button>
+
+        <button>1</button>
+        <button>2</button>
+        <button>3</button>
+        <button class="op">+</button>
+
+        <button style="grid-column: span 2">0</button>
+        <button>.</button>
+        <button class="equal">=</button>
+      </div>
+    </div>
   </body>
 </html>
