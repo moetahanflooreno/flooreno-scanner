@@ -324,7 +324,80 @@
         color: white;
         font-weight: bold;
       }
-      
+
+      .camera-wrapper {
+        position: relative;
+      }
+
+      #video {
+        width: 100%;
+        height: 200px;
+        border-radius: 6px;
+        object-fit: cover;
+      }
+
+      /* Overlay */
+      .scan-overlay {
+        position: absolute;
+        inset: 0;
+        display: none; /* hidden until camera starts */
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      }
+
+      /* Scan box */
+      .scan-box {
+        width: 80%;
+        height: 60%;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Animated line */
+      .scan-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: red;
+        animation: scanMove 2s linear infinite;
+      }
+
+      /* Default red line */
+      .scan-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: red;
+        animation: scanMove 2s linear infinite;
+        transition: background 0.2s ease;
+      }
+
+      /* ✅ Flash green on success */
+      .scan-line.flash {
+        background: #00ff88;
+      }
+
+      .scan-line.flash {
+        background: #00ff88;
+        box-shadow: 0 0 8px #00ff88;
+      }
+
+      /* Animation */
+      @keyframes scanMove {
+        0% {
+          top: 0;
+        }
+        100% {
+          top: 100%;
+        }
+      }
 
       /* ✨ New row animation */
       @keyframes rowAdd {
@@ -376,7 +449,16 @@
         <button class="stop-btn" onclick="stopCamera(true)">Stop</button>
       </div>
 
-      <video id="video" playsinline></video>
+      <div class="camera-wrapper">
+        <video id="video" playsinline></video>
+
+        <!-- Scan overlay -->
+        <div class="scan-overlay">
+          <div class="scan-box">
+            <div class="scan-line"></div>
+          </div>
+        </div>
+      </div>
 
       <div class="inputs">
         <div style="position: relative">
@@ -480,6 +562,8 @@
       const stopBtn = document.querySelector(".stop-btn");
       const searchInput = document.getElementById("searchInput");
       const clearSearchBtn = document.querySelector(".clear-search-btn");
+      const scanOverlay = document.querySelector(".scan-overlay");
+      const scanLine = document.querySelector(".scan-line");
 
       searchInput.addEventListener("input", () => {
         if (searchInput.value.trim()) {
@@ -618,6 +702,7 @@
 
       /* 📷 Camera scan */
       function startCamera() {
+        scanOverlay.style.display = "flex";
         stopBtn.classList.add("active");
         if (cameraRunning) return;
         cameraRunning = true;
@@ -630,6 +715,7 @@
           if (result && now - lastScanTime > scanDelay) {
             lastScanTime = now;
             playBeep();
+            flashScanLine();
             addRowFast(result.text, 1);
             setTimeout(startCamera, 120);
           }
@@ -652,6 +738,7 @@
       }
 
       function stopCamera() {
+        scanOverlay.style.display = "none";
         stopBtn.classList.remove("active");
         if (codeReader) codeReader.reset();
         cameraRunning = false;
@@ -1090,6 +1177,15 @@
 
 </div>
 `;
+      }
+      function flashScanLine() {
+        if (!scanLine) return;
+
+        scanLine.classList.add("flash");
+
+        setTimeout(() => {
+          scanLine.classList.remove("flash");
+        }, 200); // duration of flash
       }
 
       function load() {
