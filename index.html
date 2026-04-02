@@ -25,7 +25,7 @@
       background: linear-gradient(90deg, #007bff 50%, #ff3b3b 50%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 10px;
+      margin: 10px;
     }
 
     .container {
@@ -37,7 +37,7 @@
     button {
       border: none;
       border-radius: 6px;
-      font-size: 16px;
+      font-size: 14px;
       touch-action: manipulation;
     }
 
@@ -51,15 +51,16 @@
       flex: 3;
       background: #1e1efd;
       color: #fff;
-      padding: 14px;
+      padding: 12px;
+      font-size: 14px;
     }
 
     .stop-btn {
       flex: 1;
       background: #ccc;
-      /* default grey */
       color: #fff;
-      padding: 14px;
+      padding: 12px;
+      font-size: 14px;
     }
 
     .stop-btn.active {
@@ -95,13 +96,13 @@
     .inputs {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-bottom: 12px;
+      gap: 6px;
+      margin-bottom: 10px;
     }
 
     input {
-      padding: 14px;
-      font-size: 16px;
+      padding: 10px;
+      font-size: 14px;
       border-radius: 6px;
       border: 1px solid #ccc;
       touch-action: manipulation;
@@ -233,13 +234,45 @@
       font-weight: bold;
     }
 
-    .clear-search-btn {
-      background: #ccc;
-      color: white;
+    .search-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 10px;
     }
 
+    .search-wrapper input {
+      width: 100%;
+      padding-right: 36px;
+      /* 👈 space for the X inside */
+    }
+
+    /* X button INSIDE input */
+    .clear-search-btn {
+      position: absolute;
+      right: 12px;
+      /* 👈 inside the input edge */
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      cursor: pointer;
+      color: #aaa;
+      user-select: none;
+      line-height: 1;
+    }
+
+    /* red when active */
     .clear-search-btn.active {
-      background: #e74c3c;
+      color: red;
+      font-weight: bolder;
+    }
+
+    .search-bar {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      /* gap: 6px; */
     }
 
     /* 🧮 Floating button */
@@ -428,7 +461,7 @@
 
     .action-bar {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
       gap: 12px;
       margin-bottom: 12px;
     }
@@ -441,6 +474,72 @@
 
     #scanFlash.error {
       background: rgba(255, 0, 0, 0.35);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    /* LEFT side text */
+    .counts-left {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .actions-right {
+      display: flex;
+      gap: 6px;
+    }
+
+    .actions-right button {
+      display: inline-flex;
+      align-items: center;
+      /* vertical center */
+      justify-content: center;
+      gap: 6px;
+
+      width: auto !important;
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+      white-space: nowrap;
+
+      line-height: 1;
+      /* 🔥 important */
+    }
+
+    button.small {
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+      line-height: 1;
+      margin: 0;
+    }
+
+    /* Smaller buttons */
+    button.small {
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+    }
+
+    /* Adjust colors slightly */
+    .export-btn.small {
+      background: #1e1efd;
+      color: white;
+    }
+
+    .clear-btn.small {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-icon {
+      transform: translateY(-1px);
     }
 
     @keyframes flashFade {
@@ -544,36 +643,27 @@
       <input id="qtyInput" type="number" placeholder="Qty" min="1" inputmode="numeric" enterkeyhint="done" />
     </div>
 
-    <div id="counts" style="margin-bottom: 10px; font-weight: bold">
-      Unique SKUs: 0 | ❌ Not Found: 0
+    <div class="top-bar">
+      <div id="counts" class="counts-left">
+        Unique SKUs: 0 | ❌ Not Found: 0
+      </div>
+
+      <div class="actions-right">
+        <button class="export-btn small" onclick="exportCSV()">
+          <span class="btn-icon">📤</span> Export
+        </button>
+
+        <button class="clear-btn small" onclick="clearAll()">
+          <span class="btn-icon-clear">🗑</span> Clear
+        </button>
+
+      </div>
     </div>
 
-    <div style="display: flex; gap: 6px; margin-bottom: 10px">
-      <input id="searchInput" type="text" placeholder="Search Item" style="
-            flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-          " />
+    <div class="search-wrapper">
+      <input id="searchInput" type="text" placeholder="Search Item" class="search-bar" />
 
-      <button onclick="searchTable()" style="
-            padding: 12px 16px;
-            background: #1e1efd;
-            color: white;
-            border-radius: 6px;
-          ">
-        Search
-      </button>
-
-      <button onclick="clearSearch()" class="clear-search-btn" style="padding: 12px 16px; border-radius: 6px">
-        Clear
-      </button>
-    </div>
-
-    <div class="action-bar">
-      <button class="export-btn" onclick="exportCSV()">Export CSV</button>
-      <button class="clear-btn" onclick="clearAll()">Clear All</button>
+      <span class="clear-search-btn" onclick="clearSearch()">✕</span>
     </div>
 
     <table>
@@ -604,11 +694,15 @@
     const scanFlash = document.getElementById("scanFlash");
 
     searchInput.addEventListener("input", () => {
-      if (searchInput.value.trim()) {
+      const value = searchInput.value.trim();
+
+      if (value) {
         clearSearchBtn.classList.add("active");
       } else {
         clearSearchBtn.classList.remove("active");
       }
+
+      searchTable(); // 🔥 THIS makes it live
     });
 
     scanInput.addEventListener("input", (e) => {
@@ -992,7 +1086,6 @@
         row.style.display = "";
       });
 
-      // ✅ force button back to grey
       clearBtn.classList.remove("active");
     }
 
@@ -1210,14 +1303,6 @@
       }
     });
 
-    document
-      .getElementById("searchInput")
-      .addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          searchTable();
-        }
-      });
-
     /* 🔢 Reverse numbering */
     function renumber() {
       const rows = [...tableBody.children];
@@ -1281,21 +1366,15 @@
       });
 
       countsDiv.innerHTML = `
-<div style="display:flex; justify-content:space-between; align-items:center;padding-left:10px; padding-right:10px;">
-
-  <div>
-    Unique SKUs: ${skus.size}
-  </div>
-
-  <div style="
-  color:${missingCount > 0 ? "#e74c3c" : "#888"};
-  font-weight:${missingCount > 0 ? "bold" : "normal"};
-  opacity:${missingCount > 0 ? "1" : "0.7"};
-">
-  ❌ Not Found: ${missingCount}
-</div>
-
-</div>
+  Unique SKUs: ${skus.size} 
+  | 
+  <span style="
+    color:${missingCount > 0 ? "#e74c3c" : "#888"};
+    font-weight:${missingCount > 0 ? "bold" : "normal"};
+    opacity:${missingCount > 0 ? "1" : "0.7"};
+  ">
+    ❌ Not Found: ${missingCount}
+  </span>
 `;
     }
     function flashScanLine() {
