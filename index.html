@@ -732,8 +732,7 @@
     ];
 
     //calculator
-    document.addEventListener("DOMContentLoaded", initCalculator);
-    function initCalculator() {
+    document.addEventListener("DOMContentLoaded", () => {
       const calcBtn = document.getElementById("calcBtn");
       const calcBox = document.getElementById("calcBox");
       const display = document.getElementById("calcDisplay");
@@ -747,6 +746,7 @@
         calcBox.style.display = calcOpen ? "block" : "none";
       };
 
+      // Close calculator when clicking outside
       document.addEventListener("click", (e) => {
         const isClickInsideCalc = calcBox.contains(e.target);
         const isClickOnButton = calcBtn.contains(e.target);
@@ -761,6 +761,7 @@
         try {
           let exp = display.value;
 
+          // Handle iPhone-style %
           exp = exp.replace(
             /(\d+(\.\d+)?)([\+\-\*\/])(\d+(\.\d+)?)%/g,
             (_, a, _a2, op, b) => {
@@ -770,11 +771,13 @@
               if (op === "+" || op === "-") {
                 return `${a}${op}${a * (b / 100)}`;
               } else {
+                // for * and / behave normally
                 return `${a}${op}${b / 100}`;
               }
-            }
+            },
           );
 
+          // fallback: standalone %
           exp = exp.replace(/(\d+(\.\d+)?)%/g, (_, n) => {
             return parseFloat(n) / 100;
           });
@@ -814,89 +817,6 @@
           calculate();
         };
       });
-    } const calcBtn = document.getElementById("calcBtn");
-    const calcBox = document.getElementById("calcBox");
-    const display = document.getElementById("calcDisplay");
-    const result = document.getElementById("calcResult");
-    const keys = document.querySelectorAll("#calcKeys button");
-
-    let calcOpen = false;
-
-    calcBtn.onclick = () => {
-      calcOpen = !calcOpen;
-      calcBox.style.display = calcOpen ? "block" : "none";
-    };
-
-    // Close calculator when clicking outside
-    document.addEventListener("click", (e) => {
-      const isClickInsideCalc = calcBox.contains(e.target);
-      const isClickOnButton = calcBtn.contains(e.target);
-
-      if (!isClickInsideCalc && !isClickOnButton) {
-        calcBox.style.display = "none";
-        calcOpen = false;
-      }
-    });
-
-    function calculate() {
-      try {
-        let exp = display.value;
-
-        // Handle iPhone-style %
-        exp = exp.replace(
-          /(\d+(\.\d+)?)([\+\-\*\/])(\d+(\.\d+)?)%/g,
-          (_, a, _a2, op, b) => {
-            a = parseFloat(a);
-            b = parseFloat(b);
-
-            if (op === "+" || op === "-") {
-              return `${a}${op}${a * (b / 100)}`;
-            } else {
-              // for * and / behave normally
-              return `${a}${op}${b / 100}`;
-            }
-          },
-        );
-
-        // fallback: standalone %
-        exp = exp.replace(/(\d+(\.\d+)?)%/g, (_, n) => {
-          return parseFloat(n) / 100;
-        });
-
-        const res = Function(`"use strict"; return (${exp})`)();
-        result.innerText = "= " + res;
-        return res;
-      } catch {
-        result.innerText = "Invalid";
-        return null;
-      }
-    }
-
-    keys.forEach((btn) => {
-      btn.onclick = () => {
-        const val = btn.innerText;
-
-        if (val === "C") {
-          display.value = "";
-          result.innerText = "";
-          return;
-        }
-
-        if (val === "⌫") {
-          display.value = display.value.slice(0, -1);
-          calculate();
-          return;
-        }
-
-        if (val === "=") {
-          const res = calculate();
-          if (res !== null) display.value = res;
-          return;
-        }
-
-        display.value += val;
-        calculate();
-      };
     });
 
     /* 🔊 Beep */
@@ -911,7 +831,7 @@
 
       if (type === "error") {
         // ❌ Not found → lower + longer + double feel
-        o.frequency.value = 400;
+        o.frequency.value = 1000;
         g.gain.value = 0.3;
 
         o.start();
@@ -920,7 +840,7 @@
         // second quick beep
         const o2 = ctx.createOscillator();
         const g2 = ctx.createGain();
-        o2.frequency.value = 300;
+        o2.frequency.value = 1000;
         g2.gain.value = 0.3;
         o2.connect(g2);
         g2.connect(ctx.destination);
@@ -929,7 +849,7 @@
         o2.stop(ctx.currentTime + 0.4);
       } else {
         // ✅ Normal → short high beep
-        o.frequency.value = 1000;
+        o.frequency.value = 2000;
         g.gain.value = 0.2;
 
         o.start();
