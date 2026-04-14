@@ -640,7 +640,7 @@
             "></div>
       </div>
 
-      <input id="qtyInput" type="number" placeholder="Qty" min="1" inputmode="numeric" enterkeyhint="done" />
+      <!-- <input id="qtyInput" type="number" placeholder="Qty" min="1" inputmode="numeric" enterkeyhint="done" /> -->
     </div>
 
     <div class="top-bar">
@@ -683,7 +683,7 @@
   <script>
     const video = document.getElementById("video");
     const scanInput = document.getElementById("scanInput");
-    const qtyInput = document.getElementById("qtyInput");
+    // const qtyInput = document.getElementById("qtyInput");
     const tableBody = document.getElementById("tableBody");
     const countsDiv = document.getElementById("counts");
     const stopBtn = document.querySelector(".stop-btn");
@@ -1066,7 +1066,7 @@
           addRowFast(item.sku, 1);
 
           scanInput.value = "";
-          qtyInput.value = "";
+          // qtyInput.value = "";
         };
 
         box.appendChild(div);
@@ -1257,29 +1257,34 @@
       updateUniqueCount();
 
       scanInput.value = "";
-      qtyInput.value = "";
+      // qtyInput.value = "";
+      scrollToTopSmooth();
     }
 
     /* ⌨️ Manual add with ENTER/tick */
-    function tryManualAdd() {
-      const code = scanInput.value.trim();
-      const qty = parseInt(qtyInput.value);
-      if (!code) return;
-      if (!qty || qty < 1) {
-        qtyInput.focus();
-        return;
-      }
-      addRowFast(code, qty);
-      scanInput.focus();
-    }
+    // function tryManualAdd() {
+    //   const code = scanInput.value.trim();
+    //   const qty = parseInt(qtyInput.value);
+    //   if (!code) return;
+    //   if (!qty || qty < 1) {
+    //     qtyInput.focus();
+    //     return;
+    //   }
+    //   addRowFast(code, qty);
+    //   scanInput.focus();
+    // }
 
     // Press Enter on scan input → move to qty input
     scanInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        qtyInput.focus();
-      }
-    });
+  if (e.key === "Enter") {
+    e.preventDefault();
+
+    const code = scanInput.value.trim();
+    if (!code) return;
+
+    addRowFast(code, 1); // always add qty = 1
+  }
+});
 
     document.addEventListener("click", (e) => {
       if (!e.target.closest("#scanInput")) {
@@ -1288,20 +1293,20 @@
     });
 
     // Press Enter on qty input → add row (hardware keyboards)
-    qtyInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        tryManualAdd();
-      }
-    });
+    // qtyInput.addEventListener("keydown", (e) => {
+    //   if (e.key === "Enter") {
+    //     e.preventDefault();
+    //     tryManualAdd();
+    //   }
+    // });
 
     // iPhone numeric keyboard: when tick closes keyboard, add the row
-    qtyInput.addEventListener("blur", () => {
-      // Only add if both fields have values
-      if (scanInput.value.trim() && qtyInput.value.trim()) {
-        tryManualAdd();
-      }
-    });
+    // qtyInput.addEventListener("blur", () => {
+    //   // Only add if both fields have values
+    //   if (scanInput.value.trim() && qtyInput.value.trim()) {
+    //     tryManualAdd();
+    //   }
+    // });
 
     /* 🔢 Reverse numbering */
     function renumber() {
@@ -1402,6 +1407,14 @@
       highlightDuplicates();
       updateUniqueCount();
     }
+
+    function scrollToTopSmooth() {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth" // or "auto" if you want instant
+  });
+}
+    
 
     /* 📁 Export CSV (combine duplicates) */
     function exportCSV() {
