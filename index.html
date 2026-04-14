@@ -1,1170 +1,1192 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Flooreno Scanner</title>
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
 
-    <style>
-      * {
-        box-sizing: border-box;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <title>Flooreno Scanner</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: #f4f6f8;
-        touch-action: manipulation;
-      }
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-      h2 {
-        text-align: center;
-        font-size: 28px;
-        font-weight: bold;
-        background: linear-gradient(90deg, #007bff 50%, #ff3b3b 50%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 10px;
-      }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      touch-action: manipulation;
+    }
 
-      .container {
-        padding: 12px;
-        background: #fff;
-        min-height: 100vh;
-      }
+    h2 {
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      background: linear-gradient(90deg, #007bff 50%, #ff3b3b 50%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin: 10px;
+    }
 
-      button {
-        border: none;
-        border-radius: 6px;
-        font-size: 14px;
-        touch-action: manipulation;
-      }
+    .container {
+      padding: 12px;
+      background: #fff;
+      min-height: 100vh;
+    }
 
-      .camera-controls {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
+    button {
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      touch-action: manipulation;
+    }
 
-      .start-btn {
-        flex: 3;
-        background: #1e1efd;
-        color: #fff;
-        padding: 12px;
-        font-size: 14px;
-      }
+    .camera-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
 
-      .stop-btn {
-        flex: 1;
-        background: #ccc;
-        color: #fff;
-        padding: 12px;
-        font-size: 14px;
-      }
+    .start-btn {
+      flex: 3;
+      background: #1e1efd;
+      color: #fff;
+      padding: 12px;
+      font-size: 14px;
+    }
 
-      .stop-btn.active {
-        background: #e74c3c;
-        /* red when active */
-      }
+    .stop-btn {
+      flex: 1;
+      background: #ccc;
+      color: #fff;
+      padding: 12px;
+      font-size: 14px;
+    }
 
-      .export-btn,
-      .clear-btn {
-        width: 100%;
-        padding: 14px;
-        margin-top: 10px;
-        color: #fff;
-      }
-
-      .export-btn {
-        background: #1e1efd;
-      }
-
-      .clear-btn {
-        background: #e74c3c;
-      }
-
-      #video {
-        width: 100%;
-        height: 200px;
-        display: none;
-        margin-bottom: 10px;
-        border-radius: 6px;
-        object-fit: cover;
-      }
-
-      .inputs {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-bottom: 10px;
-      }
-
-      input {
-        padding: 10px;
-        font-size: 14px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        touch-action: manipulation;
-      }
-
-      /* Table */
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-        table-layout: fixed;
-      }
-
-      th,
-      td {
-        border: 1px solid #ddd;
-        padding: 6px;
-        text-align: center;
-      }
-
-      th.col-num,
-      td.col-num {
-        width: 36px;
-      }
-
-      th.col-del,
-      td.col-del {
-        width: 40px;
-      }
-
-      th.col-qty,
-      td.col-qty {
-        width: auto;
-      }
-
-      /* Qty layout */
-      .qty-box {
-        display: flex;
-        width: 100%;
-        align-items: stretch;
-        gap: 4px;
-      }
-
-      .qty-btn {
-        width: 34px;
-        font-size: 20px;
-        font-weight: bold;
-        background: #eee;
-        border-radius: 4px;
-        touch-action: manipulation;
-      }
-
-      .qty-input {
-        flex: 1;
-        width: 100%;
-        font-size: 16px;
-        text-align: center;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        inputmode: numeric;
-        pattern: "[0-9]*";
-      }
-
-      .delete-btn {
-        background: #e74c3c;
-        color: #fff;
-        width: 27px;
-        height: 34px;
-        border-radius: 4px;
-        touch-action: manipulation;
-      }
-
-      /* Highlight colors for duplicates */
-      .dup-color-1 {
-        background: #fff3cd;
-      }
-
-      .dup-color-2 {
-        background: #d4edda;
-      }
-
-      .dup-color-3 {
-        background: #d1ecf1;
-      }
-
-      .dup-color-4 {
-        background: #f8d7da;
-      }
-
-      .sku-desc {
-        font-size: 12px;
-        color: #666;
-        display: block;
-        margin-top: 2px;
-        text-align: center;
-        overflow-wrap: break-word;
-      }
-
-      .tooltip {
-        position: fixed;
-        background: #222;
-        color: #fff;
-        padding: 10px 12px;
-        border-radius: 6px;
-        font-size: 13px;
-        z-index: 9999;
-        max-width: 220px;
-        line-height: 1.4;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      }
-
-      .suggestion-item {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-        cursor: pointer;
-        font-size: 12px;
-      }
-
-      .suggestion-item:hover {
-        background: #f1f5ff;
-      }
-
-      .missing-item {
-        background: #ffe5e5 !important;
-      }
-
-      .missing-text {
-        color: #e74c3c;
-        font-weight: bold;
-      }
-
-      .search-wrapper {
-        position: relative;
-        width: 100%;
-        margin-bottom: 10px;
-      }
-
-      .search-wrapper input {
-        width: 100%;
-        padding-right: 36px;
-        /* 👈 space for the X inside */
-      }
-
-      /* X button INSIDE input */
-      .clear-search-btn {
-        position: absolute;
-        right: 12px;
-        /* 👈 inside the input edge */
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 16px;
-        cursor: pointer;
-        color: #aaa;
-        user-select: none;
-        line-height: 1;
-      }
-
+    .stop-btn.active {
+      background: #e74c3c;
       /* red when active */
-      .clear-search-btn.active {
-        color: red;
-        font-weight: bolder;
+    }
+
+    .export-btn,
+    .clear-btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      color: #fff;
+    }
+
+    .export-btn {
+      background: #1e1efd;
+    }
+
+    .clear-btn {
+      background: #e74c3c;
+    }
+
+    #video {
+      width: 100%;
+      height: 200px;
+      display: none;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      touch-action: manipulation;
+    }
+
+    /* Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th.col-num,
+    td.col-num {
+      width: 36px;
+    }
+
+    th.col-del,
+    td.col-del {
+      width: 40px;
+    }
+
+    th.col-qty,
+    td.col-qty {
+      width: auto;
+    }
+
+    /* Qty layout */
+    .qty-box {
+      display: flex;
+      width: 100%;
+      align-items: stretch;
+      gap: 4px;
+    }
+
+    .qty-btn {
+      width: 34px;
+      font-size: 20px;
+      font-weight: bold;
+      background: #eee;
+      border-radius: 4px;
+      touch-action: manipulation;
+    }
+
+    .qty-input {
+      flex: 1;
+      width: 100%;
+      font-size: 16px;
+      text-align: center;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      inputmode: numeric;
+      pattern: "[0-9]*";
+    }
+
+    .delete-btn {
+      background: #e74c3c;
+      color: #fff;
+      width: 27px;
+      height: 34px;
+      border-radius: 4px;
+      touch-action: manipulation;
+    }
+
+    /* Highlight colors for duplicates */
+    .dup-color-1 {
+      background: #fff3cd;
+    }
+
+    .dup-color-2 {
+      background: #d4edda;
+    }
+
+    .dup-color-3 {
+      background: #d1ecf1;
+    }
+
+    .dup-color-4 {
+      background: #f8d7da;
+    }
+
+    .sku-desc {
+      font-size: 12px;
+      color: #666;
+      display: block;
+      margin-top: 2px;
+      text-align: center;
+      overflow-wrap: break-word;
+    }
+
+    .tooltip {
+      position: fixed;
+      background: #222;
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      z-index: 9999;
+      max-width: 220px;
+      line-height: 1.4;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .suggestion-item {
+      padding: 10px;
+      border-bottom: 1px solid #e99c9c;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .suggestion-item:hover {
+      background: #f1f5ff;
+    }
+
+    .missing-item {
+      background: #ffe5e5 !important;
+    }
+
+    .missing-text {
+      color: #e74c3c;
+      font-weight: bold;
+    }
+
+    .search-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .search-wrapper input {
+      width: 100%;
+      padding-right: 36px;
+      /* 👈 space for the X inside */
+    }
+
+    /* X button INSIDE input */
+    .clear-search-btn {
+      position: absolute;
+      right: 12px;
+      /* 👈 inside the input edge */
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      cursor: pointer;
+      color: #aaa;
+      user-select: none;
+      line-height: 1;
+    }
+
+    /* red when active */
+    .clear-search-btn.active {
+      color: red;
+      font-weight: bolder;
+    }
+
+    .search-bar {
+      flex: 1;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      /* gap: 6px; */
+    }
+
+    /* 🧮 Floating button */
+    #calcBtn {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      left: auto;
+      /* padding: 5px; */
+      width: 50px;
+      height: 50px;
+      background: #1e1efd;
+      color: white;
+      font-size: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+    }
+
+    /* 🧮 Popup */
+    #calcBox {
+      position: fixed;
+      bottom: 80px;
+      right: 15px;
+      left: auto;
+      width: 260px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      display: none;
+      z-index: 9999;
+    }
+
+    #calcHeader {
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    #calcDisplay {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    #calcResult {
+      font-size: 14px;
+      color: #333;
+      min-height: 20px;
+      text-align: right;
+    }
+
+    #calcKeys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    #calcKeys button {
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      background: #f1f1f1;
+      cursor: pointer;
+    }
+
+    #calcKeys button.op {
+      background: #dfe6ff;
+      font-weight: bold;
+    }
+
+    #calcKeys button.equal {
+      background: #1e1efd;
+      color: white;
+      font-weight: bold;
+    }
+
+    .camera-wrapper {
+      position: relative;
+    }
+
+    #video {
+      width: 100%;
+      height: 200px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    /* Overlay */
+    .scan-overlay {
+      position: absolute;
+      inset: 0;
+      display: none;
+      /* hidden until camera starts */
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    /* Scan box */
+    .scan-box {
+      width: 80%;
+      height: 60%;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated line */
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: red;
+      animation: scanMove 2s linear infinite;
+    }
+
+    /* Default red line */
+    .scan-line {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: red;
+      animation: scanMove 2s linear infinite;
+      transition: background 0.2s ease;
+    }
+
+    /* ✅ Flash green on success */
+    .scan-line.flash {
+      background: #00ff88;
+    }
+
+    .scan-line.flash {
+      background: #00ff88;
+      box-shadow: 0 0 8px #00ff88;
+    }
+
+    .camera-sticky.active {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: #fff;
+      padding-bottom: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .camera-sticky {
+      transition: box-shadow 0.2s ease;
+    }
+
+    #scanFlash {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 255, 136, 0.35);
+      /* green */
+      opacity: 0;
+      pointer-events: none;
+      border-radius: 6px;
+    }
+
+    #scanFlash.active {
+      animation: flashFade 0.25s ease;
+    }
+
+    .delete-row {
+      animation: rowDelete 0.55s ease-in forwards;
+    }
+
+    .new-row {
+      animation: rowAdd 0.55s ease-out;
+    }
+
+    .action-bar {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .action-bar button {
+      width: 160px;
+      /* fixed size so they don’t stretch */
+      padding: 12px;
+    }
+
+    #scanFlash.error {
+      background: rgba(255, 0, 0, 0.35);
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 10px;
+    }
+
+    /* LEFT side text */
+    .counts-left {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .actions-right {
+      display: flex;
+      gap: 6px;
+    }
+
+    .actions-right button {
+      display: inline-flex;
+      align-items: center;
+      /* vertical center */
+      justify-content: center;
+      gap: 6px;
+
+      width: auto !important;
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+      white-space: nowrap;
+
+      line-height: 1;
+      /* 🔥 important */
+    }
+
+    button.small {
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+      line-height: 1;
+      margin: 0;
+    }
+
+    /* Smaller buttons */
+    button.small {
+      padding: 8px 10px;
+      font-size: 13px;
+      border-radius: 6px;
+    }
+
+    /* Adjust colors slightly */
+    .export-btn.small {
+      background: #1e1efd;
+      color: white;
+    }
+
+    .clear-btn.small {
+      background: #e74c3c;
+      color: white;
+    }
+
+    .btn-icon {
+      transform: translateY(-1px);
+    }
+
+    @keyframes flashFade {
+      0% {
+        opacity: 0.9;
       }
 
-      .search-bar {
-        flex: 1;
-        padding: 10px;
-        font-size: 14px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        /* gap: 6px; */
-      }
-
-      /* 🧮 Floating button */
-      #calcBtn {
-        position: fixed;
-        bottom: 15px;
-        right: 15px;
-        left: auto;
-        /* padding: 5px; */
-        width: 50px;
-        height: 50px;
-        background: #1e1efd;
-        color: white;
-        font-size: 24px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-        z-index: 9999;
-      }
-
-      /* 🧮 Popup */
-      #calcBox {
-        position: fixed;
-        bottom: 80px;
-        right: 15px;
-        left: auto;
-        width: 260px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
-        padding: 10px;
-        display: none;
-        z-index: 9999;
-      }
-
-      #calcHeader {
-        font-weight: bold;
-        margin-bottom: 8px;
-        text-align: center;
-      }
-
-      #calcDisplay {
-        width: 100%;
-        padding: 10px;
-        font-size: 16px;
-        margin-bottom: 6px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-      }
-
-      #calcResult {
-        font-size: 14px;
-        color: #333;
-        min-height: 20px;
-        text-align: right;
-      }
-
-      #calcKeys {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 6px;
-      }
-
-      #calcKeys button {
-        padding: 14px;
-        font-size: 16px;
-        border-radius: 6px;
-        border: none;
-        background: #f1f1f1;
-        cursor: pointer;
-      }
-
-      #calcKeys button.op {
-        background: #dfe6ff;
-        font-weight: bold;
-      }
-
-      #calcKeys button.equal {
-        background: #1e1efd;
-        color: white;
-        font-weight: bold;
-      }
-
-      .camera-wrapper {
-        position: relative;
-      }
-
-      #video {
-        width: 100%;
-        height: 200px;
-        border-radius: 6px;
-        object-fit: cover;
-      }
-
-      /* Overlay */
-      .scan-overlay {
-        position: absolute;
-        inset: 0;
-        display: none;
-        /* hidden until camera starts */
-        align-items: center;
-        justify-content: center;
-        pointer-events: none;
-      }
-
-      /* Scan box */
-      .scan-box {
-        width: 80%;
-        height: 60%;
-        border: 2px solid rgba(255, 255, 255, 0.8);
-        border-radius: 8px;
-        position: relative;
-        overflow: hidden;
-      }
-
-      /* Animated line */
-      .scan-line {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: red;
-        animation: scanMove 2s linear infinite;
-      }
-
-      /* Default red line */
-      .scan-line {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: red;
-        animation: scanMove 2s linear infinite;
-        transition: background 0.2s ease;
-      }
-
-      /* ✅ Flash green on success */
-      .scan-line.flash {
-        background: #00ff88;
-      }
-
-      .scan-line.flash {
-        background: #00ff88;
-        box-shadow: 0 0 8px #00ff88;
-      }
-
-      .camera-sticky.active {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background: #fff;
-        padding-bottom: 6px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      }
-
-      .camera-sticky {
-        transition: box-shadow 0.2s ease;
-      }
-
-      #scanFlash {
-        position: absolute;
-        inset: 0;
-        background: rgba(0, 255, 136, 0.35);
-        /* green */
+      100% {
         opacity: 0;
-        pointer-events: none;
-        border-radius: 6px;
+      }
+    }
+
+    /* Animation */
+    @keyframes scanMove {
+      0% {
+        top: 0;
       }
 
-      #scanFlash.active {
-        animation: flashFade 0.25s ease;
+      100% {
+        top: 100%;
+      }
+    }
+
+    /* ✨ New row animation */
+    @keyframes rowAdd {
+      from {
+        transform: translateY(-6px);
+        background-color: #d4e3fc;
+        opacity: 0;
       }
 
-      .delete-row {
-        animation: rowDelete 0.55s ease-in forwards;
+      to {
+        transform: translateY(0);
+        background-color: transparent;
+        opacity: 1;
+      }
+    }
+
+    @keyframes rowDelete {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+        background-color: #ffecec;
       }
 
-      .new-row {
-        animation: rowAdd 0.55s ease-out;
+      to {
+        transform: translateX(-20px);
+        opacity: 0;
+        height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
       }
+    }
+  </style>
+</head>
 
-      .action-bar {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        margin-bottom: 12px;
-      }
+<body>
+  <div class="container">
+    <h2>Flooreno Scanner</h2>
 
-      .action-bar button {
-        width: 160px;
-        /* fixed size so they don’t stretch */
-        padding: 12px;
-      }
-
-      #scanFlash.error {
-        background: rgba(255, 0, 0, 0.35);
-      }
-
-      .top-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 10px;
-        gap: 10px;
-      }
-
-      /* LEFT side text */
-      .counts-left {
-        font-weight: bold;
-        font-size: 14px;
-      }
-
-      .actions-right {
-        display: flex;
-        gap: 6px;
-      }
-
-      .actions-right button {
-        display: inline-flex;
-        align-items: center;
-        /* vertical center */
-        justify-content: center;
-        gap: 6px;
-
-        width: auto !important;
-        padding: 6px 10px;
-        font-size: 13px;
-        border-radius: 6px;
-        white-space: nowrap;
-
-        line-height: 1;
-        /* 🔥 important */
-      }
-
-      button.small {
-        padding: 6px 10px;
-        font-size: 13px;
-        border-radius: 6px;
-        line-height: 1;
-        margin: 0;
-      }
-
-      /* Smaller buttons */
-      button.small {
-        padding: 8px 10px;
-        font-size: 13px;
-        border-radius: 6px;
-      }
-
-      /* Adjust colors slightly */
-      .export-btn.small {
-        background: #1e1efd;
-        color: white;
-      }
-
-      .clear-btn.small {
-        background: #e74c3c;
-        color: white;
-      }
-
-      .btn-icon {
-        transform: translateY(-1px);
-      }
-
-      @keyframes flashFade {
-        0% {
-          opacity: 0.9;
-        }
-
-        100% {
-          opacity: 0;
-        }
-      }
-
-      /* Animation */
-      @keyframes scanMove {
-        0% {
-          top: 0;
-        }
-
-        100% {
-          top: 100%;
-        }
-      }
-
-      /* ✨ New row animation */
-      @keyframes rowAdd {
-        from {
-          transform: translateY(-6px);
-          background-color: #d4e3fc;
-          opacity: 0;
-        }
-
-        to {
-          transform: translateY(0);
-          background-color: transparent;
-          opacity: 1;
-        }
-      }
-
-      @keyframes rowDelete {
-        from {
-          transform: translateX(0);
-          opacity: 1;
-          background-color: #ffecec;
-        }
-
-        to {
-          transform: translateX(-20px);
-          opacity: 0;
-          height: 0;
-          padding-top: 0;
-          padding-bottom: 0;
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="container">
-      <h2>Flooreno Scanner</h2>
-
-      <div class="camera-sticky">
-        <div class="camera-controls">
-          <button class="start-btn" onclick="startCamera()">
-            Start Camera
-          </button>
-          <button class="stop-btn" onclick="stopCamera(true)">Stop</button>
-        </div>
-
-        <div class="camera-wrapper">
-          <video id="video" playsinline></video>
-
-          <!-- Scan overlay -->
-          <div class="scan-overlay">
-            <div class="scan-box">
-              <div class="scan-line"></div>
-            </div>
-          </div>
-          <div id="scanFlash"></div>
-        </div>
+    <div class="camera-sticky">
+      <div class="camera-controls">
+        <button class="start-btn" onclick="startCamera()">
+          Start Camera
+        </button>
+        <button class="stop-btn" onclick="stopCamera(true)">Stop</button>
       </div>
 
-      <div class="inputs">
-        <div style="position: relative">
-          <input
-            id="scanInput"
-            type="text"
-            placeholder="Scan or enter barcode"
-            style="width: 100%"
-          />
+      <div class="camera-wrapper">
+        <video id="video" playsinline></video>
 
-          <div
-            id="productSuggestions"
-            style="
+        <!-- Scan overlay -->
+        <div class="scan-overlay">
+          <div class="scan-box">
+            <div class="scan-line"></div>
+          </div>
+        </div>
+        <div id="scanFlash"></div>
+      </div>
+    </div>
+
+    <div class="inputs">
+      <div style="position: relative">
+        <input id="scanInput" type="text" placeholder="Scan or enter barcode" style="width: 100%" />
+
+        <div id="productSuggestions" style="
               position: absolute;
               top: 100%;
               left: 0;
               right: 0;
               background: white;
-              border: 1px solid #ccc;
+              border: 1px solid #cccccc;
               border-top: none;
               max-height: 200px;
               overflow-y: auto;
               z-index: 999;
               display: none;
-            "
-          ></div>
-        </div>
-
-        <!-- <input id="qtyInput" type="number" placeholder="Qty" min="1" inputmode="numeric" enterkeyhint="done" /> -->
+              box-shadow:
+                -5px 5px 8px rgba(46, 5, 226, 0.15),
+                5px 5px 8px rgba(46, 5, 226, 0.15),
+                0 5px 8px rgba(46, 5, 226, 0.15);
+            "></div>
       </div>
 
-      <div class="top-bar">
-        <div id="counts" class="counts-left">
-          Unique SKUs: 0 | ❌ Not Found: 0
-        </div>
-
-        <div class="actions-right">
-          <button class="export-btn small" onclick="exportCSV()">
-            <span class="btn-icon">📤</span> Export
-          </button>
-
-          <button class="clear-btn small" onclick="clearAll()">
-            <span class="btn-icon-clear">🗑</span> Clear
-          </button>
-        </div>
-      </div>
-
-      <div class="search-wrapper">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="Search Item"
-          class="search-bar"
-        />
-
-        <span class="clear-search-btn" onclick="clearSearch()">✕</span>
-      </div>
-
-      <table>
-        <thead>
-          <tr>
-            <th class="col-num">#</th>
-            <th>SKU</th>
-            <th class="col-qty">Qty</th>
-            <th class="col-del">X</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
+      <!-- <input id="qtyInput" type="number" placeholder="Qty" min="1" inputmode="numeric" enterkeyhint="done" /> -->
     </div>
 
-    <script src="https://unpkg.com/@zxing/library@latest"></script>
-    <script>
-      const video = document.getElementById("video");
-      const scanInput = document.getElementById("scanInput");
-      // const qtyInput = document.getElementById("qtyInput");
-      const tableBody = document.getElementById("tableBody");
-      const countsDiv = document.getElementById("counts");
-      const stopBtn = document.querySelector(".stop-btn");
-      const searchInput = document.getElementById("searchInput");
-      const clearSearchBtn = document.querySelector(".clear-search-btn");
-      const scanOverlay = document.querySelector(".scan-overlay");
-      const scanLine = document.querySelector(".scan-line");
-      const scanFlash = document.getElementById("scanFlash");
+    <div class="top-bar">
+      <div id="counts" class="counts-left">
+        Unique SKUs: 0 | ❌ Not Found: 0
+      </div>
 
-      searchInput.addEventListener("input", () => {
-        const value = searchInput.value.trim();
+      <div class="actions-right">
+        <button class="export-btn small" onclick="exportCSV()">
+          <span class="btn-icon">📤</span> Export
+        </button>
 
-        if (value) {
-          clearSearchBtn.classList.add("active");
-        } else {
-          clearSearchBtn.classList.remove("active");
+        <button class="clear-btn small" onclick="clearAll()">
+          <span class="btn-icon-clear">🗑</span> Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="search-wrapper">
+      <input id="searchInput" type="text" placeholder="Search Item" class="search-bar" />
+
+      <span class="clear-search-btn" onclick="clearSearch()">✕</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th class="col-num">#</th>
+          <th>SKU</th>
+          <th class="col-qty">Qty</th>
+          <th class="col-del">X</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script src="https://unpkg.com/@zxing/library@latest"></script>
+  <script>
+    const video = document.getElementById("video");
+    const scanInput = document.getElementById("scanInput");
+    // const qtyInput = document.getElementById("qtyInput");
+    const tableBody = document.getElementById("tableBody");
+    const countsDiv = document.getElementById("counts");
+    const stopBtn = document.querySelector(".stop-btn");
+    const searchInput = document.getElementById("searchInput");
+    const clearSearchBtn = document.querySelector(".clear-search-btn");
+    const scanOverlay = document.querySelector(".scan-overlay");
+    const scanLine = document.querySelector(".scan-line");
+    const scanFlash = document.getElementById("scanFlash");
+
+    searchInput.addEventListener("input", () => {
+      const value = searchInput.value.trim();
+
+      if (value) {
+        clearSearchBtn.classList.add("active");
+      } else {
+        clearSearchBtn.classList.remove("active");
+      }
+
+      searchTable(); // 🔥 THIS makes it live
+    });
+
+    scanInput.addEventListener("input", (e) => {
+      searchProducts(e.target.value);
+    });
+
+    let productMap = {}; // Fast SKU lookup
+    let upcMap = {};
+    let isLoading = false;
+
+    let videoTrack = null;
+    let zoomMin = 1;
+    let zoomMax = 1;
+    let currentZoom = 1;
+    let lastTouchDistance = null;
+
+    let codeReader;
+    let cameraRunning = false;
+    let lastScanTime = 0;
+    const scanDelay = 600; // 0.6 sec between scans
+
+    const highlightColors = [
+      "dup-color-1",
+      "dup-color-2",
+      "dup-color-3",
+      "dup-color-4",
+    ];
+
+    //calculator
+    document.addEventListener("DOMContentLoaded", () => {
+      const calcBtn = document.getElementById("calcBtn");
+      const calcBox = document.getElementById("calcBox");
+      const display = document.getElementById("calcDisplay");
+      const result = document.getElementById("calcResult");
+      const keys = document.querySelectorAll("#calcKeys button");
+
+      let calcOpen = false;
+
+      calcBtn.onclick = () => {
+        calcOpen = !calcOpen;
+        calcBox.style.display = calcOpen ? "block" : "none";
+      };
+
+      // Close calculator when clicking outside
+      document.addEventListener("click", (e) => {
+        const isClickInsideCalc = calcBox.contains(e.target);
+        const isClickOnButton = calcBtn.contains(e.target);
+
+        if (!isClickInsideCalc && !isClickOnButton) {
+          calcBox.style.display = "none";
+          calcOpen = false;
         }
-
-        searchTable(); // 🔥 THIS makes it live
       });
 
-      scanInput.addEventListener("input", (e) => {
-        searchProducts(e.target.value);
-      });
+      function calculate() {
+        try {
+          let exp = display.value;
 
-      let productMap = {}; // Fast SKU lookup
-      let upcMap = {};
-      let isLoading = false;
+          // Handle iPhone-style %
+          exp = exp.replace(
+            /(\d+(\.\d+)?)([\+\-\*\/])(\d+(\.\d+)?)%/g,
+            (_, a, _a2, op, b) => {
+              a = parseFloat(a);
+              b = parseFloat(b);
 
-      let videoTrack = null;
-      let zoomMin = 1;
-      let zoomMax = 1;
-      let currentZoom = 1;
-      let lastTouchDistance = null;
+              if (op === "+" || op === "-") {
+                return `${a}${op}${a * (b / 100)}`;
+              } else {
+                // for * and / behave normally
+                return `${a}${op}${b / 100}`;
+              }
+            },
+          );
 
-      let codeReader;
-      let cameraRunning = false;
-      let lastScanTime = 0;
-      const scanDelay = 600; // 0.6 sec between scans
+          // fallback: standalone %
+          exp = exp.replace(/(\d+(\.\d+)?)%/g, (_, n) => {
+            return parseFloat(n) / 100;
+          });
 
-      const highlightColors = [
-        "dup-color-1",
-        "dup-color-2",
-        "dup-color-3",
-        "dup-color-4",
-      ];
-
-      //calculator
-      document.addEventListener("DOMContentLoaded", () => {
-        const calcBtn = document.getElementById("calcBtn");
-        const calcBox = document.getElementById("calcBox");
-        const display = document.getElementById("calcDisplay");
-        const result = document.getElementById("calcResult");
-        const keys = document.querySelectorAll("#calcKeys button");
-
-        let calcOpen = false;
-
-        calcBtn.onclick = () => {
-          calcOpen = !calcOpen;
-          calcBox.style.display = calcOpen ? "block" : "none";
-        };
-
-        // Close calculator when clicking outside
-        document.addEventListener("click", (e) => {
-          const isClickInsideCalc = calcBox.contains(e.target);
-          const isClickOnButton = calcBtn.contains(e.target);
-
-          if (!isClickInsideCalc && !isClickOnButton) {
-            calcBox.style.display = "none";
-            calcOpen = false;
-          }
-        });
-
-        function calculate() {
-          try {
-            let exp = display.value;
-
-            // Handle iPhone-style %
-            exp = exp.replace(
-              /(\d+(\.\d+)?)([\+\-\*\/])(\d+(\.\d+)?)%/g,
-              (_, a, _a2, op, b) => {
-                a = parseFloat(a);
-                b = parseFloat(b);
-
-                if (op === "+" || op === "-") {
-                  return `${a}${op}${a * (b / 100)}`;
-                } else {
-                  // for * and / behave normally
-                  return `${a}${op}${b / 100}`;
-                }
-              },
-            );
-
-            // fallback: standalone %
-            exp = exp.replace(/(\d+(\.\d+)?)%/g, (_, n) => {
-              return parseFloat(n) / 100;
-            });
-
-            const res = Function(`"use strict"; return (${exp})`)();
-            result.innerText = "= " + res;
-            return res;
-          } catch {
-            result.innerText = "Invalid";
-            return null;
-          }
+          const res = Function(`"use strict"; return (${exp})`)();
+          result.innerText = "= " + res;
+          return res;
+        } catch {
+          result.innerText = "Invalid";
+          return null;
         }
+      }
 
-        keys.forEach((btn) => {
-          btn.onclick = () => {
-            const val = btn.innerText;
+      keys.forEach((btn) => {
+        btn.onclick = () => {
+          const val = btn.innerText;
 
-            if (val === "C") {
-              display.value = "";
-              result.innerText = "";
-              return;
-            }
+          if (val === "C") {
+            display.value = "";
+            result.innerText = "";
+            return;
+          }
 
-            if (val === "⌫") {
-              display.value = display.value.slice(0, -1);
-              calculate();
-              return;
-            }
-
-            if (val === "=") {
-              const res = calculate();
-              if (res !== null) display.value = res;
-              return;
-            }
-
-            display.value += val;
+          if (val === "⌫") {
+            display.value = display.value.slice(0, -1);
             calculate();
-          };
-        });
-      });
-
-      /* 🔊 Beep */
-      function playBeep(type = "ok") {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-
-        o.connect(g);
-        g.connect(ctx.destination);
-
-        if (type === "error") {
-          // ❌ Not found → lower + longer + double feel
-          o.frequency.value = 1000;
-          g.gain.value = 0.3;
-
-          o.start();
-          o.stop(ctx.currentTime + 0.2);
-
-          // second quick beep
-          const o2 = ctx.createOscillator();
-          const g2 = ctx.createGain();
-          o2.frequency.value = 1000;
-          g2.gain.value = 0.3;
-          o2.connect(g2);
-          g2.connect(ctx.destination);
-
-          o2.start(ctx.currentTime + 0.22);
-          o2.stop(ctx.currentTime + 0.4);
-        } else {
-          // ✅ Normal → short high beep
-          o.frequency.value = 2000;
-          g.gain.value = 0.2;
-
-          o.start();
-          o.stop(ctx.currentTime + 0.1);
-        }
-      }
-
-      function flashSuccess() {
-        if (!scanFlash) return;
-
-        scanFlash.classList.remove("active"); // reset if fast scans
-        void scanFlash.offsetWidth; // force reflow
-        scanFlash.classList.add("active");
-      }
-
-      /* 📷 Camera scan */
-      function startCamera() {
-        if (cameraRunning) return;
-        scanOverlay.style.display = "flex";
-        document.querySelector(".camera-sticky").classList.add("active");
-        stopBtn.classList.add("active");
-        cameraRunning = true;
-        video.style.display = "block";
-
-        codeReader = new ZXing.BrowserMultiFormatReader();
-
-        codeReader.decodeFromVideoDevice(null, video, (result) => {
-          const now = Date.now();
-          if (result && now - lastScanTime > scanDelay) {
-            lastScanTime = now;
-            let scannedCode = result.text;
-
-            // normalize like your addRowFast does
-            if (scannedCode.startsWith("0")) {
-              scannedCode = scannedCode.replace(/^0+/, "");
-            }
-
-            if (scannedCode.startsWith("210") && scannedCode.length === 13) {
-              scannedCode = scannedCode.slice(0, -1);
-            } else if (upcMap[scannedCode]) {
-              scannedCode = upcMap[scannedCode];
-            }
-
-            // check if exists
-            const isMissing = !productMap[scannedCode];
-
-            // 🔊 play different sound
-            playBeep(isMissing ? "error" : "ok");
-
-            if (isMissing) {
-              flashError();
-            } else {
-              flashSuccess();
-            }
-
-            flashScanLine();
-            addRowFast(result.text, 1);
-
-            setTimeout(startCamera, 120);
+            return;
           }
-        });
 
-        // ⬇️ ADD THIS PART
-        setTimeout(() => {
-          const stream = video.srcObject;
-          if (!stream) return;
-
-          videoTrack = stream.getVideoTracks()[0];
-          const capabilities = videoTrack.getCapabilities?.();
-
-          if (capabilities && capabilities.zoom) {
-            zoomMin = capabilities.zoom.min;
-            zoomMax = capabilities.zoom.max;
-            currentZoom = videoTrack.getSettings().zoom || zoomMin;
+          if (val === "=") {
+            const res = calculate();
+            if (res !== null) display.value = res;
+            return;
           }
-        }, 500);
-      }
 
-      function flashError() {
-        if (!scanFlash) return;
-
-        scanFlash.classList.remove("active");
-        scanFlash.classList.add("error");
-        void scanFlash.offsetWidth;
-        scanFlash.classList.add("active");
-
-        setTimeout(() => {
-          scanFlash.classList.remove("error");
-        }, 250);
-      }
-
-      function stopCamera() {
-        if (codeReader) codeReader.reset();
-        scanOverlay.style.display = "none";
-        stopBtn.classList.remove("active");
-        document.querySelector(".camera-sticky").classList.remove("active");
-        cameraRunning = false;
-        video.style.display = "none";
-      }
-
-      function getTouchDistance(e) {
-        const dx = e.touches[0].pageX - e.touches[1].pageX;
-        const dy = e.touches[0].pageY - e.touches[1].pageY;
-        return Math.sqrt(dx * dx + dy * dy);
-      }
-
-      video.addEventListener("touchstart", (e) => {
-        if (e.touches.length === 2) {
-          lastTouchDistance = getTouchDistance(e);
-        }
+          display.value += val;
+          calculate();
+        };
       });
+    });
 
-      video.addEventListener(
-        "touchmove",
-        (e) => {
-          if (e.touches.length === 2 && videoTrack) {
-            e.preventDefault();
+    /* 🔊 Beep */
+    function playBeep(type = "ok") {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
 
-            const newDistance = getTouchDistance(e);
-            const delta = (newDistance - lastTouchDistance) * 0.01;
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
 
-            currentZoom = Math.min(
-              zoomMax,
-              Math.max(zoomMin, currentZoom + delta),
-            );
+      o.connect(g);
+      g.connect(ctx.destination);
 
-            videoTrack.applyConstraints({
-              advanced: [{ zoom: currentZoom }],
-            });
+      if (type === "error") {
+        // ❌ Not found → lower + longer + double feel
+        o.frequency.value = 1000;
+        g.gain.value = 0.3;
 
-            lastTouchDistance = newDistance;
+        o.start();
+        o.stop(ctx.currentTime + 0.2);
+
+        // second quick beep
+        const o2 = ctx.createOscillator();
+        const g2 = ctx.createGain();
+        o2.frequency.value = 1000;
+        g2.gain.value = 0.3;
+        o2.connect(g2);
+        g2.connect(ctx.destination);
+
+        o2.start(ctx.currentTime + 0.22);
+        o2.stop(ctx.currentTime + 0.4);
+      } else {
+        // ✅ Normal → short high beep
+        o.frequency.value = 2000;
+        g.gain.value = 0.2;
+
+        o.start();
+        o.stop(ctx.currentTime + 0.1);
+      }
+    }
+
+    function flashSuccess() {
+      if (!scanFlash) return;
+
+      scanFlash.classList.remove("active"); // reset if fast scans
+      void scanFlash.offsetWidth; // force reflow
+      scanFlash.classList.add("active");
+    }
+
+    /* 📷 Camera scan */
+    function startCamera() {
+      if (cameraRunning) return;
+      scanOverlay.style.display = "flex";
+      document.querySelector(".camera-sticky").classList.add("active");
+      stopBtn.classList.add("active");
+      cameraRunning = true;
+      video.style.display = "block";
+
+      codeReader = new ZXing.BrowserMultiFormatReader();
+
+      codeReader.decodeFromVideoDevice(null, video, (result) => {
+        const now = Date.now();
+        if (result && now - lastScanTime > scanDelay) {
+          lastScanTime = now;
+          let scannedCode = result.text;
+
+          // normalize like your addRowFast does
+          if (scannedCode.startsWith("0")) {
+            scannedCode = scannedCode.replace(/^0+/, "");
           }
-        },
-        { passive: false },
-      );
 
-      video.addEventListener("touchend", () => {
-        lastTouchDistance = null;
-      });
+          if (scannedCode.startsWith("210") && scannedCode.length === 13) {
+            scannedCode = scannedCode.slice(0, -1);
+          } else if (upcMap[scannedCode]) {
+            scannedCode = upcMap[scannedCode];
+          }
 
-      function searchTable() {
-        const query = document
-          .getElementById("searchInput")
-          .value.toLowerCase()
-          .trim();
+          // check if exists
+          const isMissing = !productMap[scannedCode];
 
-        const rows = tableBody.querySelectorAll("tr");
+          // 🔊 play different sound
+          playBeep(isMissing ? "error" : "ok");
 
-        rows.forEach((row) => {
-          const rowText = row.innerText.toLowerCase();
-          const sku = row.querySelector(".sku-id").innerText;
-
-          const vendorID = (productMap[sku]?.vendorID || "").toLowerCase();
-
-          if (rowText.includes(query) || vendorID.includes(query)) {
-            row.style.display = "";
+          if (isMissing) {
+            flashError();
           } else {
-            row.style.display = "none";
+            flashSuccess();
           }
-        });
+
+          flashScanLine();
+          addRowFast(result.text, 1);
+
+          setTimeout(startCamera, 120);
+        }
+      });
+
+      // ⬇️ ADD THIS PART
+      setTimeout(() => {
+        const stream = video.srcObject;
+        if (!stream) return;
+
+        videoTrack = stream.getVideoTracks()[0];
+        const capabilities = videoTrack.getCapabilities?.();
+
+        if (capabilities && capabilities.zoom) {
+          zoomMin = capabilities.zoom.min;
+          zoomMax = capabilities.zoom.max;
+          currentZoom = videoTrack.getSettings().zoom || zoomMin;
+        }
+      }, 500);
+    }
+
+    function flashError() {
+      if (!scanFlash) return;
+
+      scanFlash.classList.remove("active");
+      scanFlash.classList.add("error");
+      void scanFlash.offsetWidth;
+      scanFlash.classList.add("active");
+
+      setTimeout(() => {
+        scanFlash.classList.remove("error");
+      }, 250);
+    }
+
+    function stopCamera() {
+      if (codeReader) codeReader.reset();
+      scanOverlay.style.display = "none";
+      stopBtn.classList.remove("active");
+      document.querySelector(".camera-sticky").classList.remove("active");
+      cameraRunning = false;
+      video.style.display = "none";
+    }
+
+    function getTouchDistance(e) {
+      const dx = e.touches[0].pageX - e.touches[1].pageX;
+      const dy = e.touches[0].pageY - e.touches[1].pageY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    video.addEventListener("touchstart", (e) => {
+      if (e.touches.length === 2) {
+        lastTouchDistance = getTouchDistance(e);
+      }
+    });
+
+    video.addEventListener(
+      "touchmove",
+      (e) => {
+        if (e.touches.length === 2 && videoTrack) {
+          e.preventDefault();
+
+          const newDistance = getTouchDistance(e);
+          const delta = (newDistance - lastTouchDistance) * 0.01;
+
+          currentZoom = Math.min(
+            zoomMax,
+            Math.max(zoomMin, currentZoom + delta),
+          );
+
+          videoTrack.applyConstraints({
+            advanced: [{ zoom: currentZoom }],
+          });
+
+          lastTouchDistance = newDistance;
+        }
+      },
+      { passive: false },
+    );
+
+    video.addEventListener("touchend", () => {
+      lastTouchDistance = null;
+    });
+
+    function searchTable() {
+      const query = document
+        .getElementById("searchInput")
+        .value.toLowerCase()
+        .trim();
+
+      const rows = tableBody.querySelectorAll("tr");
+
+      rows.forEach((row) => {
+        const rowText = row.innerText.toLowerCase();
+        const sku = row.querySelector(".sku-id").innerText;
+
+        const vendorID = (productMap[sku]?.vendorID || "").toLowerCase();
+
+        if (rowText.includes(query) || vendorID.includes(query)) {
+          row.style.display = "";
+        } else {
+          row.style.display = "none";
+        }
+      });
+    }
+
+    function searchProducts(query) {
+      const box = document.getElementById("productSuggestions");
+
+      if (!query || query.length < 2) {
+        box.style.display = "none";
+        return;
       }
 
-      function searchProducts(query) {
-        const box = document.getElementById("productSuggestions");
+      query = query.toLowerCase();
 
-        if (!query || query.length < 2) {
-          box.style.display = "none";
-          return;
+      let results = [];
+
+      Object.entries(productMap).forEach(([sku, product]) => {
+        const text = (
+          product.description +
+          " " +
+          sku +
+          " " +
+          (product.vendorID || "") +
+          " " +
+          (product.upc || "")
+        ).toLowerCase();
+
+        const words = query.split(" ").filter((w) => w);
+        const isMatch = words.every((word) => text.includes(word));
+        if (isMatch) {
+          results.push({ sku, description: product.description });
         }
+      });
 
-        query = query.toLowerCase();
+      results = results.slice(0, 10); // limit results
 
-        let results = [];
+      const totalMatches = results.length;
 
-        Object.entries(productMap).forEach(([sku, product]) => {
-          const text = (
-            product.description +
-            " " +
-            sku +
-            " " +
-            (product.vendorID || "") +
-            " " +
-            (product.upc || "")
-          ).toLowerCase();
+      if (results.length === 0) {
+        box.style.display = "none";
+        return;
+      }
 
-          const words = query.split(" ").filter((w) => w);
-          const isMatch = words.every((word) => text.includes(word));
-          if (isMatch) {
-            results.push({ sku, description: product.description });
-          }
-        });
+      box.innerHTML = `
+  <div style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding: 6px 10px;
+    font-size: 11px;
+    color: #666;
+    background: #f7f7f7;
+    border-bottom: 1px solid #eee;
+  ">
+    <span>${totalMatches} result${totalMatches === 1 ? "" : "s"}</span>
 
-        results = results.slice(0, 10); // limit results
+    <span id="closeSuggestionsBtn"
+      style="
+        cursor:pointer;
+        font-size:14px;
+        font-weight:bold;
+        color:red;
+        padding: 0 6px;
+      ">
+      ✕
+    </span>
+  </div>
+`;
 
-        if (results.length === 0) {
-          box.style.display = "none";
-          return;
-        }
+      document.getElementById("closeSuggestionsBtn").onclick = () => {
+        box.style.display = "none";
+      };
 
-        box.innerHTML = "";
+      results.forEach((item) => {
+        const div = document.createElement("div");
+        div.className = "suggestion-item";
 
-        results.forEach((item) => {
-          const div = document.createElement("div");
-          div.className = "suggestion-item";
-
-          div.innerHTML = `
+        div.innerHTML = `
           <b>${item.sku}</b><br>
           ${item.description}<br>
           <span style="color:#888; font-size:11px;">Vendor ID: ${productMap[item.sku].vendorID || "-"}</span>
         `;
-          div.onclick = () => {
-            box.style.display = "none";
+        div.onclick = () => {
+          box.style.display = "none";
 
-            addRowFast(item.sku, 1);
+          addRowFast(item.sku, 1);
 
-            scanInput.value = "";
-            // qtyInput.value = "";
+          scanInput.value = "";
+          // qtyInput.value = "";
+        };
+
+        box.appendChild(div);
+      });
+
+      box.style.display = "block";
+    }
+
+    function clearSearch() {
+      const input = document.getElementById("searchInput");
+      const clearBtn = document.querySelector(".clear-search-btn");
+
+      input.value = "";
+
+      const rows = tableBody.querySelectorAll("tr");
+      rows.forEach((row) => {
+        row.style.display = "";
+      });
+
+      clearBtn.classList.remove("active");
+    }
+
+    async function loadProducts() {
+      try {
+        const response = await fetch("products.csv");
+        const text = await response.text();
+
+        const rows = text.split(/\r?\n/).slice(1);
+
+        rows.forEach((row) => {
+          if (!row.trim()) return;
+
+          const cols = row.split(",");
+
+          const sku = cols[0]?.trim();
+          const description = cols[1] || "";
+          const price = cols[2] || "";
+          const notes = cols[3] || "";
+          const upc = cols[4]?.trim(); // COLUMN E
+          const vendorID = cols[5] || ""; // COLUMN F
+
+          if (!sku) return;
+
+          productMap[sku] = {
+            description,
+            price,
+            notes,
+            vendorID,
+            upc,
           };
 
-          box.appendChild(div);
-        });
-
-        box.style.display = "block";
-      }
-
-      function clearSearch() {
-        const input = document.getElementById("searchInput");
-        const clearBtn = document.querySelector(".clear-search-btn");
-
-        input.value = "";
-
-        const rows = tableBody.querySelectorAll("tr");
-        rows.forEach((row) => {
-          row.style.display = "";
-        });
-
-        clearBtn.classList.remove("active");
-      }
-
-      async function loadProducts() {
-        try {
-          const response = await fetch("products.csv");
-          const text = await response.text();
-
-          const rows = text.split(/\r?\n/).slice(1);
-
-          rows.forEach((row) => {
-            if (!row.trim()) return;
-
-            const cols = row.split(",");
-
-            const sku = cols[0]?.trim();
-            const description = cols[1] || "";
-            const price = cols[2] || "";
-            const notes = cols[3] || "";
-            const upc = cols[4]?.trim(); // COLUMN E
-            const vendorID = cols[5] || ""; // COLUMN F
-
-            if (!sku) return;
-
-            productMap[sku] = {
-              description,
-              price,
-              notes,
-              vendorID,
-              upc,
-            };
-
-            if (upc) {
-              upcMap[upc] = sku;
-            }
-          });
-
-          console.log("Products loaded:", Object.keys(productMap).length);
-          console.log("UPCs loaded:", Object.keys(upcMap).length);
-        } catch (err) {
-          console.error("Error loading products.csv", err);
-        }
-      }
-      /* ➕ Add row */
-      function addRowFast(barcode, qty) {
-        // ✅ Remove leading zero from UPC
-        if (barcode.startsWith("0")) {
-          barcode = barcode.replace(/^0+/, ""); // removes all leading zeros
-        }
-
-        if (barcode.startsWith("210") && barcode.length === 13) {
-          barcode = barcode.slice(0, -1);
-        } else {
-          // check UPC map
-          if (upcMap[barcode]) {
-            barcode = upcMap[barcode]; // convert UPC -> System SKU
+          if (upc) {
+            upcMap[upc] = sku;
           }
+        });
+
+        console.log("Products loaded:", Object.keys(productMap).length);
+        console.log("UPCs loaded:", Object.keys(upcMap).length);
+      } catch (err) {
+        console.error("Error loading products.csv", err);
+      }
+    }
+    /* ➕ Add row */
+    function addRowFast(barcode, qty) {
+
+      document.getElementById("productSuggestions").style.display = "none";
+      scanInput.value = "";
+      // ✅ Remove leading zero from UPC
+      if (barcode.startsWith("0")) {
+        barcode = barcode.replace(/^0+/, ""); // removes all leading zeros
+      }
+
+      if (barcode.startsWith("210") && barcode.length === 13) {
+        barcode = barcode.slice(0, -1);
+      } else {
+        // check UPC map
+        if (upcMap[barcode]) {
+          barcode = upcMap[barcode]; // convert UPC -> System SKU
         }
+      }
 
-        const tr = document.createElement("tr");
-        tr.classList.add("new-row");
-        const product = productMap[barcode];
-        const isMissing = !product;
+      const tr = document.createElement("tr");
+      tr.classList.add("new-row");
+      const product = productMap[barcode];
+      const isMissing = !product;
 
-        tr.innerHTML = `
+      tr.innerHTML = `
         <td class="col-num row-num"></td>
 
         <td>
@@ -1185,134 +1207,117 @@
         <td class="col-del"><button class="delete-btn">X</button></td>
         `;
 
-        if (isMissing) {
-          tr.classList.add("missing-item");
-        }
+      if (isMissing) {
+        tr.classList.add("missing-item");
+      }
 
-        const numCell = tr.querySelector(".row-num");
+      const numCell = tr.querySelector(".row-num");
 
-        numCell.onclick = (e) => {
-          const old = document.querySelector(".tooltip");
-          if (old) old.remove();
+      numCell.onclick = (e) => {
+        const old = document.querySelector(".tooltip");
+        if (old) old.remove();
 
-          const tooltip = document.createElement("div");
-          tooltip.className = "tooltip";
+        const tooltip = document.createElement("div");
+        tooltip.className = "tooltip";
 
-          tooltip.innerHTML = `
+        tooltip.innerHTML = `
         <b>Price:</b> $${product.price ? parseFloat(product.price).toFixed(2) : "-"}<br>
         <b>Vendor ID:</b> ${product.vendorID || "-"}<br>
         <b>Notes:</b> ${product.notes || "-"}
         `;
 
-          document.body.appendChild(tooltip);
+        document.body.appendChild(tooltip);
 
-          const rect = e.target.getBoundingClientRect();
+        const rect = e.target.getBoundingClientRect();
 
-          tooltip.style.left = rect.left + "px";
-          tooltip.style.top = rect.bottom + 6 + "px";
+        tooltip.style.left = rect.left + "px";
+        tooltip.style.top = rect.bottom + 6 + "px";
 
-          setTimeout(() => {
-            document.addEventListener(
-              "click",
-              () => {
-                tooltip.remove();
-              },
-              { once: true },
-            );
-          }, 10);
-        };
-
-        tr.addEventListener("animationend", () => {
-          tr.classList.remove("new-row");
-        });
-
-        const minus = tr.querySelectorAll(".qty-btn")[0];
-        const plus = tr.querySelectorAll(".qty-btn")[1];
-        const input = tr.querySelector(".qty-input");
-
-        minus.onclick = () => {
-          input.value = Math.max(1, parseInt(input.value) - 1);
-          save();
-          highlightDuplicates();
-          updateUniqueCount();
-        };
-        plus.onclick = () => {
-          input.value = parseInt(input.value) + 1;
-          save();
-          highlightDuplicates();
-          updateUniqueCount();
-        };
-        input.onchange = () => {
-          save();
-          highlightDuplicates();
-          updateUniqueCount();
-        };
-
-        tr.querySelector(".delete-btn").onclick = () => {
-          tr.classList.add("delete-row");
-
-          tr.addEventListener(
-            "animationend",
+        setTimeout(() => {
+          document.addEventListener(
+            "click",
             () => {
-              tr.remove();
-              renumber();
-              save();
-              highlightDuplicates();
-              updateUniqueCount();
+              tooltip.remove();
             },
             { once: true },
           );
-        };
+        }, 10);
+      };
 
-        tableBody.prepend(tr);
-        renumber();
+      tr.addEventListener("animationend", () => {
+        tr.classList.remove("new-row");
+      });
+
+      const minus = tr.querySelectorAll(".qty-btn")[0];
+      const plus = tr.querySelectorAll(".qty-btn")[1];
+      const input = tr.querySelector(".qty-input");
+
+      minus.onclick = () => {
+        input.value = Math.max(1, parseInt(input.value) - 1);
         save();
         highlightDuplicates();
         updateUniqueCount();
+      };
+      plus.onclick = () => {
+        input.value = parseInt(input.value) + 1;
+        save();
+        highlightDuplicates();
+        updateUniqueCount();
+      };
+      input.onchange = () => {
+        save();
+        highlightDuplicates();
+        updateUniqueCount();
+      };
 
-        scanInput.value = "";
-        // qtyInput.value = "";
-        scrollToTopSmooth();
-      }
+      tr.querySelector(".delete-btn").onclick = () => {
+        tr.classList.add("delete-row");
 
-      /* ⌨️ Manual add with ENTER/tick */
-      // function tryManualAdd() {
-      //   const code = scanInput.value.trim();
-      //   const qty = parseInt(qtyInput.value);
-      //   if (!code) return;
-      //   if (!qty || qty < 1) {
-      //     qtyInput.focus();
-      //     return;
-      //   }
-      //   addRowFast(code, qty);
-      //   scanInput.focus();
-      // }
+        tr.addEventListener(
+          "animationend",
+          () => {
+            tr.remove();
+            renumber();
+            save();
+            highlightDuplicates();
+            updateUniqueCount();
+          },
+          { once: true },
+        );
+      };
 
-      // Press Enter on scan input → move to qty input
-      let justSubmitted = false;
+      tableBody.prepend(tr);
+      renumber();
+      save();
+      highlightDuplicates();
+      updateUniqueCount();
 
-      // ENTER
-      scanInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
+      scanInput.value = "";
+      // qtyInput.value = "";
+      scrollToTopSmooth();
+    }
 
-          if (justSubmitted) return;
+    /* ⌨️ Manual add with ENTER/tick */
+    // function tryManualAdd() {
+    //   const code = scanInput.value.trim();
+    //   const qty = parseInt(qtyInput.value);
+    //   if (!code) return;
+    //   if (!qty || qty < 1) {
+    //     qtyInput.focus();
+    //     return;
+    //   }
+    //   addRowFast(code, qty);
+    //   scanInput.focus();
+    // }
 
-          const code = scanInput.value.trim();
-          if (!code) return;
+    // Press Enter on scan input → move to qty input
+    let justSubmitted = false;
 
-          justSubmitted = true;
+    // ENTER
+    scanInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
 
-          addRowFast(code, 1);
-
-          setTimeout(() => {
-            justSubmitted = false;
-          }, 100);
-        }
-      });
-
-      // iPhone ✔️ (Done button)
-      scanInput.addEventListener("blur", () => {
         if (justSubmitted) return;
 
         const code = scanInput.value.trim();
@@ -1325,205 +1330,221 @@
         setTimeout(() => {
           justSubmitted = false;
         }, 100);
+      }
+    });
+
+    // iPhone ✔️ (Done button)
+    scanInput.addEventListener("blur", () => {
+      if (justSubmitted) return;
+
+      const code = scanInput.value.trim();
+      if (!code) return;
+
+      justSubmitted = true;
+
+      addRowFast(code, 1);
+
+      setTimeout(() => {
+        justSubmitted = false;
+      }, 100);
+    });
+
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("#scanInput")) {
+        document.getElementById("productSuggestions").style.display = "none";
+      }
+    });
+
+    // Press Enter on qty input → add row (hardware keyboards)
+    // qtyInput.addEventListener("keydown", (e) => {
+    //   if (e.key === "Enter") {
+    //     e.preventDefault();
+    //     tryManualAdd();
+    //   }
+    // });
+
+    // iPhone numeric keyboard: when tick closes keyboard, add the row
+    // qtyInput.addEventListener("blur", () => {
+    //   // Only add if both fields have values
+    //   if (scanInput.value.trim() && qtyInput.value.trim()) {
+    //     tryManualAdd();
+    //   }
+    // });
+
+    /* 🔢 Reverse numbering */
+    function renumber() {
+      const rows = [...tableBody.children];
+      const total = rows.length;
+      rows.forEach(
+        (r, i) => (r.querySelector(".row-num").innerText = total - i),
+      );
+    }
+
+    /* 💾 Storage */
+    function save() {
+      if (isLoading) return;
+
+      const data = [];
+      tableBody.querySelectorAll("tr").forEach((r) => {
+        data.push({
+          id: r.querySelector(".sku-id").innerText,
+          qty: r.querySelector(".qty-input").value,
+        });
+      });
+      localStorage.setItem("scannedItems", JSON.stringify(data));
+    }
+
+    /* Highlight duplicates */
+    function highlightDuplicates() {
+      const skuMap = {};
+      [...tableBody.children].forEach((row) => {
+        const sku = row.querySelector(".sku-id").innerText;
+        if (!skuMap[sku]) skuMap[sku] = [];
+        skuMap[sku].push(row);
       });
 
-      document.addEventListener("click", (e) => {
-        if (!e.target.closest("#scanInput")) {
-          document.getElementById("productSuggestions").style.display = "none";
+      let colorIndex = 0;
+      Object.values(skuMap).forEach((rows) => {
+        const color =
+          rows.length > 1
+            ? highlightColors[colorIndex % highlightColors.length]
+            : "";
+        rows.forEach((r) => {
+          highlightColors.forEach((c) => r.classList.remove(c));
+          if (color) r.classList.add(color);
+        });
+        if (rows.length > 1) colorIndex++;
+      });
+    }
+
+    /* Unique SKU count */
+    function updateUniqueCount() {
+      const rows = [...tableBody.children];
+
+      const skus = new Set();
+      let missingCount = 0;
+
+      rows.forEach((r) => {
+        const sku = r.querySelector(".sku-id").innerText;
+        skus.add(sku);
+
+        if (r.classList.contains("missing-item")) {
+          missingCount++;
         }
       });
 
-      // Press Enter on qty input → add row (hardware keyboards)
-      // qtyInput.addEventListener("keydown", (e) => {
-      //   if (e.key === "Enter") {
-      //     e.preventDefault();
-      //     tryManualAdd();
-      //   }
-      // });
+      countsDiv.innerHTML = `
+          Unique SKUs: ${skus.size}
+          ${missingCount > 0
+          ? ` | <span style="color:#e74c3c;font-weight:bold;">
+                    ❌ Not Found: ${missingCount}
+                  </span>`
+          : ""
+        }
+        `;
+    }
+    function flashScanLine() {
+      if (!scanLine) return;
 
-      // iPhone numeric keyboard: when tick closes keyboard, add the row
-      // qtyInput.addEventListener("blur", () => {
-      //   // Only add if both fields have values
-      //   if (scanInput.value.trim() && qtyInput.value.trim()) {
-      //     tryManualAdd();
-      //   }
-      // });
+      scanLine.classList.add("flash");
 
-      /* 🔢 Reverse numbering */
-      function renumber() {
-        const rows = [...tableBody.children];
-        const total = rows.length;
-        rows.forEach(
-          (r, i) => (r.querySelector(".row-num").innerText = total - i),
-        );
-      }
+      setTimeout(() => {
+        scanLine.classList.remove("flash");
+      }, 200); // duration of flash
+    }
 
-      /* 💾 Storage */
-      function save() {
-        if (isLoading) return;
+    function load() {
+      isLoading = true;
+      const data = JSON.parse(localStorage.getItem("scannedItems") || "[]");
+      data.reverse().forEach((d) => addRowFast(d.id, d.qty));
+      isLoading = false;
+    }
 
-        const data = [];
-        tableBody.querySelectorAll("tr").forEach((r) => {
-          data.push({
-            id: r.querySelector(".sku-id").innerText,
-            qty: r.querySelector(".qty-input").value,
-          });
-        });
-        localStorage.setItem("scannedItems", JSON.stringify(data));
-      }
+    /* 🧹 Clear */
+    function clearAll() {
+      if (!confirm("Clear all scanned items?")) return;
+      tableBody.innerHTML = "";
+      localStorage.removeItem("scannedItems");
+      highlightDuplicates();
+      updateUniqueCount();
+    }
 
-      /* Highlight duplicates */
-      function highlightDuplicates() {
-        const skuMap = {};
-        [...tableBody.children].forEach((row) => {
-          const sku = row.querySelector(".sku-id").innerText;
-          if (!skuMap[sku]) skuMap[sku] = [];
-          skuMap[sku].push(row);
-        });
-
-        let colorIndex = 0;
-        Object.values(skuMap).forEach((rows) => {
-          const color =
-            rows.length > 1
-              ? highlightColors[colorIndex % highlightColors.length]
-              : "";
-          rows.forEach((r) => {
-            highlightColors.forEach((c) => r.classList.remove(c));
-            if (color) r.classList.add(color);
-          });
-          if (rows.length > 1) colorIndex++;
-        });
-      }
-
-      /* Unique SKU count */
-      function updateUniqueCount() {
-        const rows = [...tableBody.children];
-
-        const skus = new Set();
-        let missingCount = 0;
-
-        rows.forEach((r) => {
-          const sku = r.querySelector(".sku-id").innerText;
-          skus.add(sku);
-
-          if (r.classList.contains("missing-item")) {
-            missingCount++;
-          }
-        });
-
-        countsDiv.innerHTML = `
-  Unique SKUs: ${skus.size} 
-  | 
-  <span style="
-    color:${missingCount > 0 ? "#e74c3c" : "#888"};
-    font-weight:${missingCount > 0 ? "bold" : "normal"};
-    opacity:${missingCount > 0 ? "1" : "0.7"};
-  ">
-    ❌ Not Found: ${missingCount}
-  </span>
-`;
-      }
-      function flashScanLine() {
-        if (!scanLine) return;
-
-        scanLine.classList.add("flash");
-
-        setTimeout(() => {
-          scanLine.classList.remove("flash");
-        }, 200); // duration of flash
-      }
-
-      function load() {
-        isLoading = true;
-        const data = JSON.parse(localStorage.getItem("scannedItems") || "[]");
-        data.reverse().forEach((d) => addRowFast(d.id, d.qty));
-        isLoading = false;
-      }
-
-      /* 🧹 Clear */
-      function clearAll() {
-        if (!confirm("Clear all scanned items?")) return;
-        tableBody.innerHTML = "";
-        localStorage.removeItem("scannedItems");
-        highlightDuplicates();
-        updateUniqueCount();
-      }
-
-      function scrollToTopSmooth() {
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth", // or "auto" if you want instant
-        });
-      }
-
-      /* 📁 Export CSV (combine duplicates) */
-      function exportCSV() {
-        let name = prompt("Enter file name:", "scanned_items");
-        if (!name) return;
-        if (!name.endsWith(".csv")) name += ".csv";
-
-        const combined = {};
-        tableBody.querySelectorAll("tr").forEach((r) => {
-          let id = r.querySelector(".sku-id").innerText;
-          let qty = parseInt(r.querySelector(".qty-input").value);
-          if (id.startsWith("210") && id.length === 13) id = id.slice(0, -1);
-          if (combined[id]) combined[id] += qty;
-          else combined[id] = qty;
-        });
-
-        let csv = "System Id,Order Qty\n";
-        Object.entries(combined).forEach(([id, qty]) => {
-          csv += `${id},${qty}\n`;
-        });
-
-        const blob = new Blob([csv], { type: "text/csv" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = name;
-        a.click();
-      }
-
-      loadProducts().then(() => {
-        load();
-        highlightDuplicates();
-        updateUniqueCount();
+    function scrollToTopSmooth() {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth", // or "auto" if you want instant
       });
-    </script>
+    }
 
-    <!-- 🧮 Calculator Button -->
-    <div id="calcBtn">🧮</div>
+    /* 📁 Export CSV (combine duplicates) */
+    function exportCSV() {
+      let name = prompt("Enter file name:", "scanned_items");
+      if (!name) return;
+      if (!name.endsWith(".csv")) name += ".csv";
 
-    <div id="calcBox">
-      <div id="calcHeader">Calculator</div>
+      const combined = {};
+      tableBody.querySelectorAll("tr").forEach((r) => {
+        let id = r.querySelector(".sku-id").innerText;
+        let qty = parseInt(r.querySelector(".qty-input").value);
+        if (id.startsWith("210") && id.length === 13) id = id.slice(0, -1);
+        if (combined[id]) combined[id] += qty;
+        else combined[id] = qty;
+      });
 
-      <input id="calcDisplay" type="text" placeholder="0" readonly />
-      <div id="calcResult"></div>
+      let csv = "System Id,Order Qty\n";
+      Object.entries(combined).forEach(([id, qty]) => {
+        csv += `${id},${qty}\n`;
+      });
 
-      <div id="calcKeys">
-        <button class="op">C</button>
-        <button class="op">⌫</button>
-        <button class="op">%</button>
-        <button class="op">/</button>
+      const blob = new Blob([csv], { type: "text/csv" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = name;
+      a.click();
+    }
 
-        <button>7</button>
-        <button>8</button>
-        <button>9</button>
-        <button class="op">*</button>
+    loadProducts().then(() => {
+      load();
+      highlightDuplicates();
+      updateUniqueCount();
+    });
+  </script>
 
-        <button>4</button>
-        <button>5</button>
-        <button>6</button>
-        <button class="op">-</button>
+  <!-- 🧮 Calculator Button -->
+  <div id="calcBtn">🧮</div>
 
-        <button>1</button>
-        <button>2</button>
-        <button>3</button>
-        <button class="op">+</button>
+  <div id="calcBox">
+    <div id="calcHeader">Calculator</div>
 
-        <button style="grid-column: span 2">0</button>
-        <button>.</button>
-        <button class="equal">=</button>
-      </div>
+    <input id="calcDisplay" type="text" placeholder="0" readonly />
+    <div id="calcResult"></div>
+
+    <div id="calcKeys">
+      <button class="op">C</button>
+      <button class="op">⌫</button>
+      <button class="op">%</button>
+      <button class="op">/</button>
+
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button class="op">*</button>
+
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button class="op">-</button>
+
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button class="op">+</button>
+
+      <button style="grid-column: span 2">0</button>
+      <button>.</button>
+      <button class="equal">=</button>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>
