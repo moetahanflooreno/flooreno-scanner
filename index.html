@@ -695,6 +695,7 @@
     const scanOverlay = document.querySelector(".scan-overlay");
     const scanLine = document.querySelector(".scan-line");
     const scanFlash = document.getElementById("scanFlash");
+    let selectingSuggestion = false;
 
     searchInput.addEventListener("input", () => {
       const value = searchInput.value.trim();
@@ -1080,8 +1081,11 @@
   </div>
 `;
 
-      document.getElementById("closeSuggestionsBtn").onclick = () => {
+      document.getElementById("closeSuggestionsBtn").onmousedown = (e) => {
+        e.preventDefault(); // 🔥 stop blur from firing
+
         box.style.display = "none";
+        scanInput.value = ""; // ✅ clear input so nothing gets added
       };
 
       results.forEach((item) => {
@@ -1093,13 +1097,13 @@
           ${item.description}<br>
           <span style="color:#888; font-size:11px;">Vendor ID: ${productMap[item.sku].vendorID || "-"}</span>
         `;
-        div.onclick = () => {
-          box.style.display = "none";
+        div.onmousedown = (e) => {
+          e.preventDefault(); // 🔥 prevents blur from firing first
 
+          box.style.display = "none";
           addRowFast(item.sku, 1);
 
           scanInput.value = "";
-          // qtyInput.value = "";
         };
 
         box.appendChild(div);
@@ -1164,7 +1168,6 @@
     }
     /* ➕ Add row */
     function addRowFast(barcode, qty) {
-
       document.getElementById("productSuggestions").style.display = "none";
       scanInput.value = "";
       // ✅ Remove leading zero from UPC
