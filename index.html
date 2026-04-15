@@ -215,7 +215,7 @@
     }
 
     .suggestion-item {
-      padding: 10px;
+      padding: 8px;
       border-bottom: 1px solid #e99c9c;
       cursor: pointer;
       font-size: 12px;
@@ -642,7 +642,6 @@
                 5px 5px 8px rgba(46, 5, 226, 0.15),
                 0 5px 8px rgba(46, 5, 226, 0.15);
               border-radius: 10px;
-              overflow: hidden;
             "></div>
       </div>
 
@@ -1510,6 +1509,11 @@
       a.href = URL.createObjectURL(blob);
       a.download = name;
       a.click();
+
+      URL.revokeObjectURL(a.href);
+
+      document.activeElement?.blur();
+      window.focus();
     }
 
     loadProducts().then(() => {
