@@ -789,6 +789,33 @@
       "dup-color-4",
     ];
 
+    function applyZoom(value) {
+      if (!videoTrack) return;
+
+      const caps = videoTrack.getCapabilities?.();
+
+      if (!caps || !caps.zoom) return;
+
+      const clamped = Math.max(
+        caps.zoom.min,
+        Math.min(caps.zoom.max, value),
+      );
+
+      currentZoom = clamped;
+
+      videoTrack.applyConstraints({
+        advanced: [{ zoom: clamped }],
+      });
+    }
+
+    function zoomIn() {
+      applyZoom(currentZoom + 0.3);
+    }
+
+    function zoomOut() {
+      applyZoom(currentZoom - 0.3);
+    }
+
     //calculator
     document.addEventListener("DOMContentLoaded", () => {
       const calcBtn = document.getElementById("calcBtn");
@@ -814,33 +841,6 @@
           calcOpen = false;
         }
       });
-
-      function applyZoom(value) {
-        if (!videoTrack) return;
-
-        const caps = videoTrack.getCapabilities?.();
-
-        if (!caps || !caps.zoom) return;
-
-        const clamped = Math.max(
-          caps.zoom.min,
-          Math.min(caps.zoom.max, value),
-        );
-
-        currentZoom = clamped;
-
-        videoTrack.applyConstraints({
-          advanced: [{ zoom: clamped }],
-        });
-      }
-
-      function zoomIn() {
-        applyZoom(currentZoom + 0.3);
-      }
-
-      function zoomOut() {
-        applyZoom(currentZoom - 0.3);
-      }
 
       function calculate() {
         try {
