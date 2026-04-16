@@ -572,27 +572,23 @@
 
     .zoom-controls {
       position: absolute;
-      bottom: 10px;
       right: 10px;
-      display: flex;
+      bottom: 10px;
+      display: none;
       flex-direction: column;
-      gap: 6px;
-      z-index: 1000;
+      gap: 8px;
+      z-index: 9999;
     }
 
     .zoom-controls button {
-      width: 25px;
-      height: 25px;
-      font-size: 20px;
-      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
       border: none;
-      background: rgba(30, 30, 253, 0.9);
+      background: rgba(0, 0, 0, 0.6);
       color: white;
-      cursor: pointer;
-    }
-
-    .zoom-controls button:active {
-      transform: scale(0.95);
+      font-size: 22px;
+      font-weight: bold;
     }
 
     @keyframes flashFade {
@@ -671,9 +667,9 @@
           </div>
         </div>
         <div id="scanFlash"></div>
-        <div class="zoom-controls">
-          <button id="zoomInBtn">+</button>
-          <button id="zoomOutBtn">−</button>
+        <div id="zoomControls" class="zoom-controls">
+          <button onclick="zoomIn()">+</button>
+          <button onclick="zoomOut()">−</button>
         </div>
       </div>
     </div>
@@ -753,7 +749,7 @@
     const scanOverlay = document.querySelector(".scan-overlay");
     const scanLine = document.querySelector(".scan-line");
     const scanFlash = document.getElementById("scanFlash");
-    const zoomStep = 0.2;
+    const zoomControls = document.getElementById("zoomControls");
 
     searchInput.addEventListener("input", () => {
       const value = searchInput.value.trim();
@@ -793,26 +789,6 @@
       "dup-color-4",
     ];
 
-    document.getElementById("zoomInBtn").onclick = () => {
-      if (!videoTrack) return;
-
-      currentZoom = Math.min(zoomMax, currentZoom + zoomStep);
-
-      videoTrack.applyConstraints({
-        advanced: [{ zoom: currentZoom }],
-      });
-    };
-
-    document.getElementById("zoomOutBtn").onclick = () => {
-      if (!videoTrack) return;
-
-      currentZoom = Math.max(zoomMin, currentZoom - zoomStep);
-
-      videoTrack.applyConstraints({
-        advanced: [{ zoom: currentZoom }],
-      });
-    };
-
     //calculator
     document.addEventListener("DOMContentLoaded", () => {
       const calcBtn = document.getElementById("calcBtn");
@@ -838,6 +814,26 @@
           calcOpen = false;
         }
       });
+
+      function zoomIn() {
+        if (!videoTrack) return;
+
+        currentZoom = Math.min(zoomMax, currentZoom + 0.2);
+
+        videoTrack.applyConstraints({
+          advanced: [{ zoom: currentZoom }],
+        });
+      }
+
+      function zoomOut() {
+        if (!videoTrack) return;
+
+        currentZoom = Math.max(zoomMin, currentZoom - 0.2);
+
+        videoTrack.applyConstraints({
+          advanced: [{ zoom: currentZoom }],
+        });
+      }
 
       function calculate() {
         try {
@@ -953,6 +949,7 @@
       scanOverlay.style.display = "flex";
       document.querySelector(".camera-sticky").classList.add("active");
       stopBtn.classList.add("active");
+      zoomControls.style.display = "flex";
       cameraRunning = true;
       video.style.display = "block";
 
@@ -1027,6 +1024,7 @@
       if (codeReader) codeReader.reset();
       scanOverlay.style.display = "none";
       stopBtn.classList.remove("active");
+      zoomControls.style.display = "none";
       document.querySelector(".camera-sticky").classList.remove("active");
       cameraRunning = false;
       video.style.display = "none";
