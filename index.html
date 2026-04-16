@@ -815,24 +815,31 @@
         }
       });
 
-      function zoomIn() {
+      function applyZoom(value) {
         if (!videoTrack) return;
 
-        currentZoom = Math.min(zoomMax, currentZoom + 0.2);
+        const caps = videoTrack.getCapabilities?.();
+
+        if (!caps || !caps.zoom) return;
+
+        const clamped = Math.max(
+          caps.zoom.min,
+          Math.min(caps.zoom.max, value),
+        );
+
+        currentZoom = clamped;
 
         videoTrack.applyConstraints({
-          advanced: [{ zoom: currentZoom }],
+          advanced: [{ zoom: clamped }],
         });
       }
 
+      function zoomIn() {
+        applyZoom(currentZoom + 0.3);
+      }
+
       function zoomOut() {
-        if (!videoTrack) return;
-
-        currentZoom = Math.max(zoomMin, currentZoom - 0.2);
-
-        videoTrack.applyConstraints({
-          advanced: [{ zoom: currentZoom }],
-        });
+        applyZoom(currentZoom - 0.3);
       }
 
       function calculate() {
@@ -992,19 +999,21 @@
       });
 
       // ⬇️ ADD THIS PART
-      setTimeout(() => {
-        const stream = video.srcObject;
-        if (!stream) return;
+      const stream = video.srcObject;
 
+      if (stream) {
         videoTrack = stream.getVideoTracks()[0];
-        const capabilities = videoTrack.getCapabilities?.();
 
-        if (capabilities && capabilities.zoom) {
-          zoomMin = capabilities.zoom.min;
-          zoomMax = capabilities.zoom.max;
-          currentZoom = videoTrack.getSettings().zoom || zoomMin;
+        const caps = videoTrack.getCapabilities?.();
+
+        if (caps?.zoom) {
+          zoomMin = caps.zoom.min;
+          zoomMax = caps.zoom.max;
+
+          const settings = videoTrack.getSettings?.();
+          currentZoom = settings?.zoom || 1;
         }
-      }, 500);
+      }
     }
 
     function flashError() {
