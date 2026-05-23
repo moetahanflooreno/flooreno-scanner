@@ -1071,15 +1071,13 @@ function showScanMessage(text) {
             flashError();
             flashScanLine();
 
-            // optional extra feedback
-            console.warn("Not in system:", scannedCode);
             return; // 🔥 STOP HERE (do NOT add row)
           }
 
           if (isMissing) {
             // old behavior (still add, just warn)
             flashError();
-            showScanMessage("NOT IN SYSTEM", "error");
+            showScanMessage("NOT IN SYSTEM");
             
           } else {
             flashSuccess();
