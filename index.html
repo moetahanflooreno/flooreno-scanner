@@ -575,32 +575,20 @@
       transform: translateY(-1px);
     }
 
-.scan-box {
-  width: 80%;
-  height: 60%;
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  border-radius: 8px;
-  position: relative;
-  overflow: hidden;
-}
-
-/* 🔴 MESSAGE INSIDE SCAN BOX */
-#scanMessage {
+    #scanMessage {
   position: absolute;
-  inset: 0; /* fills the scan box */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-weight: bold;
-  font-size: 16px;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 0, 0, 0.85);
   color: white;
-
-  background: rgba(255, 0, 0, 0.75);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
   opacity: 0;
-  transition: opacity 0.25s ease;
   pointer-events: none;
-  z-index: 5;
+  transition: opacity 0.3s ease;
 }
 
 #scanMessage.show {
@@ -903,16 +891,18 @@
         }
       });
 
-function showScanMessage(text) {
+      function showScanMessage(text, type = "error") {
   const msg = document.getElementById("scanMessage");
   if (!msg) return;
 
   msg.innerText = text;
+  msg.style.background = type === "error"
+    ? "rgba(255, 0, 0, 0.85)"
+    : "rgba(0, 200, 100, 0.85)";
+
   msg.classList.add("show");
 
-  clearTimeout(window.__scanMsgTimer);
-
-  window.__scanMsgTimer = setTimeout(() => {
+  setTimeout(() => {
     msg.classList.remove("show");
   }, 900);
 }
@@ -1070,15 +1060,16 @@ function showScanMessage(text) {
             // ❌ BLOCK ADDING
             flashError();
             flashScanLine();
-            showScanMessage("NOT IN SYSTEM");
 
+            // optional extra feedback
+            console.warn("Not in system:", scannedCode);
             return; // 🔥 STOP HERE (do NOT add row)
           }
 
           if (isMissing) {
             // old behavior (still add, just warn)
             flashError();
-            showScanMessage("NOT IN SYSTEM");
+            showScanMessage("NOT IN SYSTEM", "error");
             
           } else {
             flashSuccess();
