@@ -67,6 +67,7 @@
       border-radius: 6px;
       font-size: 14px;
       touch-action: manipulation;
+      cursor: pointer;
     }
 
     .camera-controls {
@@ -102,6 +103,7 @@
       padding: 14px;
       margin-top: 10px;
       color: #fff;
+      cursor: pointer;
     }
 
     .export-btn {
@@ -516,6 +518,9 @@
     .counts-left {
       font-weight: bold;
       font-size: 14px;
+      display: flex;
+      flex-direction: column;
+
     }
 
     .actions-right {
@@ -711,16 +716,16 @@
 
     <div class="top-bar">
       <div id="counts" class="counts-left">
-        Unique SKUs: 0 | ❌ Not Found: 0
+        Unique SKUs: 0  ❌ Not Found: 0
       </div>
       <label style="
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 10px;
+            cursor: pointer;
           ">
-        <input type="checkbox" id="allowNonInventory" />
-        Allow non-inventory items
+        <input type="checkbox" id="allowNonInventory" style="cursor: pointer;" />
+        Unrestrict
       </label>
 
       <div class="actions-right">
@@ -1570,7 +1575,7 @@
       countsDiv.innerHTML = `
           Unique SKUs: ${skus.size}
           ${missingCount > 0
-          ? ` | <span style="color:#e74c3c;font-weight:bold;">
+          ? `<span style="color:#e74c3c;font-weight:bold;">
                     ❌ Not Found: ${missingCount}
                   </span>`
           : ""
@@ -1612,9 +1617,29 @@
 
     /* 📁 Export CSV (combine duplicates) */
     function exportCSV() {
+      
+      const rows = tableBody.querySelectorAll("tr");
+
+  let hasMissing = false;
+
+  rows.forEach((r) => {
+    if (r.classList.contains("missing-item")) {
+      hasMissing = true;
+    }
+  });
+
+  if (hasMissing) {
+    const ok = confirm(
+      "⚠ There are items NOT in the system.\n\nDo you want to export anyway?"
+    );
+
+    if (!ok) return;
+  }
+
       let name = prompt("Enter file name:", "scanned_items");
       if (!name) return;
       if (!name.endsWith(".csv")) name += ".csv";
+
 
       const combined = {};
       tableBody.querySelectorAll("tr").forEach((r) => {
