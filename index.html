@@ -575,6 +575,26 @@
       transform: translateY(-1px);
     }
 
+    #scanMessage {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 0, 0, 0.85);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#scanMessage.show {
+  opacity: 1;
+}
+
     @keyframes flashFade {
       0% {
         opacity: 0.9;
@@ -681,6 +701,7 @@
         <div class="scan-overlay">
           <div class="scan-box">
             <div class="scan-line"></div>
+            <div id="scanMessage"></div>
           </div>
         </div>
         <div id="scanFlash"></div>
@@ -719,7 +740,9 @@
         Unique SKUs: 0  ❌ Not Found: 0
       </div>
       <label style="
-            display: flex;
+      /* do not display for now, but can be enabled for testing or specific use cases */
+              display: none;
+            /* display: flex; */
             align-items: center;
             gap: 8px;
             cursor: pointer;
@@ -867,6 +890,22 @@
           calcOpen = false;
         }
       });
+
+      function showScanMessage(text, type = "error") {
+  const msg = document.getElementById("scanMessage");
+  if (!msg) return;
+
+  msg.innerText = text;
+  msg.style.background = type === "error"
+    ? "rgba(255, 0, 0, 0.85)"
+    : "rgba(0, 200, 100, 0.85)";
+
+  msg.classList.add("show");
+
+  setTimeout(() => {
+    msg.classList.remove("show");
+  }, 900);
+}
 
       function calculate() {
         try {
@@ -1030,6 +1069,8 @@
           if (isMissing) {
             // old behavior (still add, just warn)
             flashError();
+            showScanMessage("NOT IN SYSTEM", "error");
+            
           } else {
             flashSuccess();
           }
