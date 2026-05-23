@@ -418,7 +418,7 @@
       border: 2px solid rgba(255, 255, 255, 0.8);
       border-radius: 8px;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
 
     /* Animated line */
@@ -577,27 +577,26 @@
 
 #scanMessage {
   position: absolute;
-  bottom: 20%;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  
-  font-weight: 700;
-  font-size: 20px;
+  transform: translate(-50%, -50%);
+
+  font-weight: 800;
+  font-size: 22px;
   color: red;
 
-  background: transparent;
-  padding: 0;
-
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 
+  z-index: 9999; /* 🔥 important: above scan line */
+
+  pointer-events: none;
   text-align: center;
-  z-index: 10;
   white-space: nowrap;
+
+  text-shadow: 0 0 6px rgba(0,0,0,0.6); /* makes it readable on camera */
 }
 
-/* show state */
 #scanMessage.show {
   opacity: 1;
 }
@@ -909,24 +908,14 @@ function showScanMessage(text, type = "error") {
 
   msg.innerText = text;
 
-  // style for inside scan box
-  msg.style.position = "absolute";
-  msg.style.bottom = "10px";
-  msg.style.left = "50%";
-  msg.style.transform = "translateX(-50%)";
-  msg.style.fontWeight = "bold";
-  msg.style.fontSize = "18px";
   msg.style.color = type === "error" ? "red" : "#00ff88";
-  msg.style.background = "transparent";
-  msg.style.padding = "0";
-  msg.style.opacity = "1";
 
   msg.classList.add("show");
 
   setTimeout(() => {
     msg.classList.remove("show");
     msg.innerText = "";
-  }, 900);
+  }, 800);
 }
 
       function calculate() {
