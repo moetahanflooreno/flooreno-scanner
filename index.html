@@ -876,6 +876,21 @@
       "dup-color-4",
     ];
 
+function showScanMessage(text, type = "error") {
+  const msg = document.getElementById("scanMessage");
+  if (!msg) return;
+
+  msg.innerText = text;
+
+  msg.style.color = type === "error" ? "red" : "#00ff88";
+
+  msg.classList.add("show");
+
+  setTimeout(() => {
+    msg.classList.remove("show");
+    msg.innerText = "";
+  }, 800);
+}
     //calculator
     document.addEventListener("DOMContentLoaded", () => {
       const calcBtn = document.getElementById("calcBtn");
@@ -901,24 +916,6 @@
           calcOpen = false;
         }
       });
-
-function showScanMessage(text, type = "error") {
-  const msg = document.getElementById("scanMessage");
-  if (!msg) return;
-
-  msg.innerText = text;
-
-  msg.style.color = type === "error" ? "red" : "#00ff88";
-
-  msg.classList.add("show");
-
-  setTimeout(() => {
-    msg.classList.remove("show");
-    msg.innerText = "";
-  }, 800);
-}
-
-
 
       function calculate() {
         try {
@@ -1073,7 +1070,7 @@ function showScanMessage(text, type = "error") {
             // ❌ BLOCK ADDING
             flashError();
             flashScanLine();
-
+            showScanMessage("NOT IN SYSTEM", "error");
             // optional extra feedback
             console.warn("Not in system:", scannedCode);
             return; // 🔥 STOP HERE (do NOT add row)
@@ -1082,7 +1079,7 @@ function showScanMessage(text, type = "error") {
           if (isMissing) {
             // old behavior (still add, just warn)
             flashError();
-            showScanMessage("NOT IN SYSTEM", "error");
+            
             
           } else {
             flashSuccess();
