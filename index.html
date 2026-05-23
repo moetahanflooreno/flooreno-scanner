@@ -1012,7 +1012,7 @@
           // 🔊 sound logic stays the same
           playBeep(isMissing ? "error" : "ok");
 
-          if (isMissing && allowNonInventory) {
+          if (isMissing && !allowNonInventory) {
             // ❌ BLOCK ADDING
             flashError();
             flashScanLine();
