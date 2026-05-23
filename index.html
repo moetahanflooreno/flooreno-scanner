@@ -575,24 +575,36 @@
       transform: translateY(-1px);
     }
 
-    #scanMessage {
+#scanMessage {
   position: absolute;
-  bottom: 10px;
+  bottom: 20%;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(255, 0, 0, 0.85);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-weight: bold;
-  font-size: 14px;
+  
+  font-weight: 700;
+  font-size: 20px;
+  color: red;
+
+  background: transparent;
+  padding: 0;
+
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease;
+
+  text-align: center;
+  z-index: 10;
+  white-space: nowrap;
 }
 
+/* show state */
 #scanMessage.show {
   opacity: 1;
+}
+
+/* optional: success style if you ever use it */
+#scanMessage.success {
+  color: #00ff88;
 }
 
     @keyframes flashFade {
@@ -891,19 +903,29 @@
         }
       });
 
-      function showScanMessage(text, type = "error") {
+function showScanMessage(text, type = "error") {
   const msg = document.getElementById("scanMessage");
   if (!msg) return;
 
   msg.innerText = text;
-  msg.style.background = type === "error"
-    ? "rgba(255, 0, 0, 0.85)"
-    : "rgba(0, 200, 100, 0.85)";
+
+  // style for inside scan box
+  msg.style.position = "absolute";
+  msg.style.bottom = "10px";
+  msg.style.left = "50%";
+  msg.style.transform = "translateX(-50%)";
+  msg.style.fontWeight = "bold";
+  msg.style.fontSize = "18px";
+  msg.style.color = type === "error" ? "red" : "#00ff88";
+  msg.style.background = "transparent";
+  msg.style.padding = "0";
+  msg.style.opacity = "1";
 
   msg.classList.add("show");
 
   setTimeout(() => {
     msg.classList.remove("show");
+    msg.innerText = "";
   }, 900);
 }
 
