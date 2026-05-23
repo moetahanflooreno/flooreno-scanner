@@ -486,24 +486,53 @@
     .export-btn.small { background: #1e1efd; color: white; }
     .clear-btn.small  { background: #e74c3c; color: white; }
 
-    #zoomControls {
-      position: absolute;
-      bottom: 10px;
-      right: 7px;
-      display: none;
-      flex-direction: column;
-      gap: 6px;
-      z-index: 10;
-    }
+#zoomControls {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 10;
+}
 
-    #zoomControls button {
-      width: 25px;
-      height: 25px;
-      font-size: 20px;
-      border-radius: 50%;
-      background: #1e1efd;
-      color: white;
-    }
+#zoomControls button {
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  color: white;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+#zoomControls button:active {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0.92);
+}
+
+#zoomLabel {
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 6px;
+  padding: 2px 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+
+#zoomLabel.show { opacity: 1; }
     .scan-overlay.loading .scan-box { display: none; }
 
 .scan-overlay.loading::after {
@@ -565,10 +594,11 @@
       <div class="camera-wrapper">
         <video id="video" playsinline></video>
 
-        <div id="zoomControls">
-          <button id="zoomInBtn">+</button>
-          <button id="zoomOutBtn">−</button>
-        </div>
+     <div id="zoomControls">
+  <button id="zoomInBtn">＋</button>
+  <div id="zoomLabel">1.0x</div>
+  <button id="zoomOutBtn">－</button>
+</div>
 
         <div class="scan-overlay">
           <div class="scan-box">
@@ -677,7 +707,7 @@
     let codeReader;
     let cameraRunning    = false;
     let lastScanTime     = 0;
-    const SCAN_DELAY     = 600;
+    const SCAN_DELAY     = 500;
     const ZOOM_STEP      = 0.3;
 
     // Duplicate highlight colours
@@ -885,23 +915,37 @@
         const d = getTouchDistance(e);
         currentZoom = Math.min(zoomMax, Math.max(zoomMin, currentZoom + (d - lastTouchDistance) * 0.005));
         videoTrack.applyConstraints({ advanced: [{ zoom: currentZoom }] });
+        showZoomLabel();
         lastTouchDistance = d;
       }
     }, { passive: false });
 
     video.addEventListener("touchend", () => { lastTouchDistance = null; });
 
-    document.getElementById("zoomInBtn").onclick = () => {
-      if (!videoTrack) return;
-      currentZoom = Math.min(zoomMax, currentZoom + ZOOM_STEP);
-      videoTrack.applyConstraints({ advanced: [{ zoom: currentZoom }] });
-    };
+    let zoomLabelTimer = null;
 
-    document.getElementById("zoomOutBtn").onclick = () => {
-      if (!videoTrack) return;
-      currentZoom = Math.max(zoomMin, currentZoom - ZOOM_STEP);
-      videoTrack.applyConstraints({ advanced: [{ zoom: currentZoom }] });
-    };
+function showZoomLabel() {
+  const label = document.getElementById("zoomLabel");
+  if (!label) return;
+  label.innerText = currentZoom.toFixed(1) + "x";
+  label.classList.add("show");
+  clearTimeout(zoomLabelTimer);
+  zoomLabelTimer = setTimeout(() => label.classList.remove("show"), 1500);
+}
+
+document.getElementById("zoomInBtn").onclick = () => {
+  if (!videoTrack) return;
+  currentZoom = Math.min(zoomMax, currentZoom + ZOOM_STEP);
+  videoTrack.applyConstraints({ advanced: [{ zoom: currentZoom }] });
+  showZoomLabel();
+};
+
+document.getElementById("zoomOutBtn").onclick = () => {
+  if (!videoTrack) return;
+  currentZoom = Math.max(zoomMin, currentZoom - ZOOM_STEP);
+  videoTrack.applyConstraints({ advanced: [{ zoom: currentZoom }] });
+  showZoomLabel();
+};
 
     /* ─── Add row ───────────────────────────────────────── */
     function addRowFast(barcode, qty) {
